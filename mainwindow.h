@@ -18,9 +18,9 @@ public:
     ~MainWindow();
 
 private:
-    void initToolBar(void);
-    void initCentralWidget(void);
-    void initStatusBar(void);
+    inline void initToolBar(void);
+    inline void initCentralWidget(void);
+    inline void initStatusBar(void);
 
 private:
     // Toolbar items

@@ -20,7 +20,7 @@ MainWindow::~MainWindow()
 
 }
 
-void MainWindow::initToolBar()
+inline void MainWindow::initToolBar()
 {
     QToolBar *toolBar = new QToolBar(this);
 
@@ -84,14 +84,14 @@ void MainWindow::initToolBar()
     addToolBar(toolBar);
 }
 
-void MainWindow::initCentralWidget(void)
+inline void MainWindow::initCentralWidget(void)
 {
     mainPlotLive = new QMainPlot(this);
 
     setCentralWidget(mainPlotLive);
 }
 
-void MainWindow::initStatusBar()
+inline void MainWindow::initStatusBar()
 {
     QStatusBar *statusBar = new QStatusBar(this);
 
