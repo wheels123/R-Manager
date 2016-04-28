@@ -6,6 +6,9 @@
 #include <QLabel>
 #include <QPushButton>
 
+#include "qmainplot.h"
+
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -26,6 +29,8 @@ private:
     QPushButton *pushButtonConnect;
     // Status Bar items
     QLabel      *labelStatus;
+    // Plot widget
+    QMainPlot   *mainPlotLive;
 
 private:
     // Button events

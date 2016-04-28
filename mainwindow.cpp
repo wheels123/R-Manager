@@ -86,6 +86,9 @@ void MainWindow::initToolBar()
 
 void MainWindow::initCentralWidget(void)
 {
+    mainPlotLive = new QMainPlot(this);
+
+    setCentralWidget(mainPlotLive);
 }
 
 void MainWindow::initStatusBar()
