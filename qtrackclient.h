@@ -24,7 +24,7 @@ private:
     void onTcpConnected(void);
     void onTcpDisconnected(void);
     void onTcpReadyRead(void);
-    void onTcpSocketError(void);
+    void onTcpSocketError(QAbstractSocket::SocketError error);
 };
 
 #endif // QTRACKCLIENT_H

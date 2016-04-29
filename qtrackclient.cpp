@@ -89,7 +89,9 @@ void QTrackClient::onTcpReadyRead()
     }
 }
 
-void QTrackClient::onTcpSocketError()
+void QTrackClient::onTcpSocketError(QAbstractSocket::SocketError error)
 {
+    Q_UNUSED(error);
+
     qDebug() << Q_FUNC_INFO << __LINE__;
 }

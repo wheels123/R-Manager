@@ -5,6 +5,9 @@
 #include <QStatusBar>
 
 
+//
+// Constructor and deconstructor
+//
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -22,6 +25,9 @@ MainWindow::~MainWindow()
 
 }
 
+//
+// Initialization functions
+//
 inline void MainWindow::initToolBar()
 {
     QToolBar *toolBar = new QToolBar(this);
@@ -100,7 +106,7 @@ inline void MainWindow::initStatusBar()
     labelStatus = new QLabel(statusBar);
     labelStatus->setAlignment(Qt::AlignHCenter);
 
-    labelStatus->setText("Ready to plot");
+    labelStatus->setText("Status : Ready to plot");
 
     statusBar->addWidget(labelStatus);
 
@@ -110,15 +116,19 @@ inline void MainWindow::initStatusBar()
 inline void MainWindow::initTrackClient()
 {
     trackClient = new QTrackClient(this);
+
+    using SocketErrorFunc = void(QTcpSocket::*)(QAbstractSocket::SocketError);
+    connect(trackClient,
+            static_cast<SocketErrorFunc>(&QAbstractSocket::error),
+            this,
+            &onTcpSocketError);
 }
 
 //
-//
+// Button event
 //
 inline void MainWindow::onButtonConnectClicked()
 {
-    qDebug() << Q_FUNC_INFO << __LINE__;
-
     pushButtonConnect->setText("Dis&connect");
 
     trackClient->connectToHost(lineEditHost->text(),
@@ -127,8 +137,6 @@ inline void MainWindow::onButtonConnectClicked()
 
 inline void MainWindow::onButtonDisconnectClicked()
 {
-    qDebug() << Q_FUNC_INFO << __LINE__;
-
     trackClient->disconnectFromHost();
 
     pushButtonConnect->setText("&Connect");
@@ -143,3 +151,12 @@ void MainWindow::onPushButtonConnectClicked()
     }
 }
 
+//
+// Socket error event
+//
+void MainWindow::onTcpSocketError(QAbstractSocket::SocketError error)
+{
+    Q_UNUSED(error);
+
+    labelStatus->setText("Status : " + trackClient->errorString());
+}

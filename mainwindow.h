@@ -41,6 +41,8 @@ private:
     inline void onButtonConnectClicked();
     inline void onButtonDisconnectClicked();
     void onPushButtonConnectClicked();
+    // Socket error event
+    void onTcpSocketError(QAbstractSocket::SocketError error);
 };
 
 #endif // MAINWINDOW_H
