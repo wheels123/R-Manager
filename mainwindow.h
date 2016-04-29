@@ -7,6 +7,7 @@
 #include <QPushButton>
 
 #include "qmainplot.h"
+#include "qtrackclient.h"
 
 
 class MainWindow : public QMainWindow
@@ -21,16 +22,19 @@ private:
     inline void initToolBar(void);
     inline void initCentralWidget(void);
     inline void initStatusBar(void);
+    inline void initTrackClient(void);
 
 private:
     // Toolbar items
-    QLineEdit   *lineEditHost;
-    QLineEdit   *lineEditPort;
-    QPushButton *pushButtonConnect;
+    QLineEdit    *lineEditHost;
+    QLineEdit    *lineEditPort;
+    QPushButton  *pushButtonConnect;
     // Status Bar items
-    QLabel      *labelStatus;
+    QLabel       *labelStatus;
     // Plot widget
-    QMainPlot   *mainPlotLive;
+    QMainPlot    *mainPlotLive;
+    // TCP socket
+    QTrackClient *trackClient;
 
 private:
     // Button events

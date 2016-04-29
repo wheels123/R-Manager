@@ -3,7 +3,7 @@
 #include <QIntValidator>
 #include <QHBoxLayout>
 #include <QStatusBar>
-#include <QDebug>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
     initCentralWidget();
 
     initStatusBar();
+
+    initTrackClient();
 }
 
 MainWindow::~MainWindow()
@@ -105,6 +107,11 @@ inline void MainWindow::initStatusBar()
     setStatusBar(statusBar);
 }
 
+inline void MainWindow::initTrackClient()
+{
+    trackClient = new QTrackClient(this);
+}
+
 //
 //
 //
@@ -113,11 +120,16 @@ inline void MainWindow::onButtonConnectClicked()
     qDebug() << Q_FUNC_INFO << __LINE__;
 
     pushButtonConnect->setText("Dis&connect");
+
+    trackClient->connectToHost(lineEditHost->text(),
+                               lineEditPort->text().toInt());
 }
 
 inline void MainWindow::onButtonDisconnectClicked()
 {
     qDebug() << Q_FUNC_INFO << __LINE__;
+
+    trackClient->disconnectFromHost();
 
     pushButtonConnect->setText("&Connect");
 }

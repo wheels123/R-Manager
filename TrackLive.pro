@@ -8,6 +8,8 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+QT       += network
+
 CONFIG += c++11
 CONFIG += qwt
 
@@ -17,7 +19,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-        qmainplot.cpp
+        qmainplot.cpp \
+        qtrackclient.cpp
 
 HEADERS  += mainwindow.h \
-        qmainplot.h
+        qmainplot.h \
+        qtrackclient.h
