@@ -3,6 +3,7 @@
 #include <QIntValidator>
 #include <QHBoxLayout>
 #include <QStatusBar>
+#include <QFileDialog>
 
 
 //
@@ -28,10 +29,8 @@ MainWindow::~MainWindow()
 //
 // Initialization functions
 //
-inline void MainWindow::initToolBar()
+inline QWidget *MainWindow::initToolBarNetwork(QToolBar *toolBar)
 {
-    QToolBar *toolBar = new QToolBar(this);
-
     QWidget *hBoxWidget = new QWidget(toolBar);
 
     //
@@ -82,12 +81,48 @@ inline void MainWindow::initToolBar()
     hBoxLayout->addWidget(lineEditPort);
     hBoxLayout->addWidget(labelIndentB);
     hBoxLayout->addWidget(pushButtonConnect);
+
+    return hBoxWidget;
+}
+
+inline QWidget *MainWindow::initToolBarFile(QToolBar *toolBar)
+{
+    //
+    QWidget *hBoxWidget = new QWidget(toolBar);
+
+    //
+    pushButtonLoad = new QPushButton("&Load", hBoxWidget);
+
+    connect(pushButtonLoad, &QPushButton::clicked,
+            this, &MainWindow::onPushButtonLoadClicked);
+
+    pushButtonSave = new QPushButton("&Save", hBoxWidget);
+
+    connect(pushButtonSave, &QPushButton::clicked,
+            this, &MainWindow::onPushButtonSaveClicked);
+
+    QHBoxLayout *hBoxLayout = new QHBoxLayout(hBoxWidget);
+
+    hBoxLayout->addWidget(pushButtonLoad);
+    hBoxLayout->addWidget(pushButtonSave);
     hBoxLayout->addStretch();
+
+    return hBoxWidget;
+}
+
+inline void MainWindow::initToolBar()
+{
+    QToolBar *toolBar = new QToolBar(this);
+
+    QWidget *hBoxWidgetNetwork = initToolBarNetwork(toolBar);
+    QWidget *hBoxWidgetFile = initToolBarFile(toolBar);
 
     //
     // Add all these things into toolbar
     //
-    toolBar->addWidget(hBoxWidget);
+    toolBar->addWidget(hBoxWidgetNetwork);
+    toolBar->addSeparator();
+    toolBar->addWidget(hBoxWidgetFile);
 
     addToolBar(toolBar);
 }
@@ -106,7 +141,7 @@ inline void MainWindow::initStatusBar()
     labelStatus = new QLabel(statusBar);
     labelStatus->setAlignment(Qt::AlignHCenter);
 
-    labelStatus->setText("Status : Ready to plot");
+    labelStatus->setText("Status : Ready to connect");
 
     statusBar->addWidget(labelStatus);
 
@@ -122,6 +157,11 @@ inline void MainWindow::initTrackClient()
             static_cast<SocketErrorFunc>(&QAbstractSocket::error),
             this,
             &onTcpSocketError);
+
+    connect(trackClient,
+            &QTrackClient::newPoint,
+            this,
+            &onNewPoint);
 }
 
 //
@@ -151,6 +191,50 @@ void MainWindow::onPushButtonConnectClicked()
     }
 }
 
+void MainWindow::onPushButtonSaveClicked()
+{
+    QString fileName;
+    fileName = QFileDialog::getSaveFileName(this,
+                                            tr("Save to ..."),
+                                            ".",
+                                            tr("JSON files (*.json)"));
+    if(fileName.isEmpty()) {
+        return;
+    }
+
+    QString message;
+    bool result = trackClient->saveToJsonFile(fileName);
+    if (result) {
+        message = "Status : " + fileName + " saved";
+    } else {
+        message = "Status : failed to save to" + fileName;
+    }
+
+    labelStatus->setText(message);
+}
+
+void MainWindow::onPushButtonLoadClicked()
+{
+    QString fileName;
+    fileName = QFileDialog::getOpenFileName(this,
+                                            tr("Open ..."),
+                                            ".",
+                                            tr("JSON files (*.json)"));
+    if(fileName.isEmpty()) {
+        return;
+    }
+
+    QString message;
+    bool result = trackClient->LoadJsonFile(fileName);
+    if (result) {
+        message = "Status : " + fileName + " loaded";
+    } else {
+        message = "Status : failed to load " + fileName;
+    }
+
+    labelStatus->setText(message);
+}
+
 //
 // Socket error event
 //
@@ -159,4 +243,12 @@ void MainWindow::onTcpSocketError(QAbstractSocket::SocketError error)
     Q_UNUSED(error);
 
     labelStatus->setText("Status : " + trackClient->errorString());
+}
+
+//
+// New point event
+//
+void MainWindow::onNewPoint(const int type, const QPointF &point)
+{
+    qDebug() << Q_FUNC_INFO << __LINE__ << type << point;
 }

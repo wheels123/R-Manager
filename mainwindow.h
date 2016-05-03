@@ -20,6 +20,8 @@ public:
 
 private:
     inline void initToolBar(void);
+    inline QWidget *initToolBarFile(QToolBar *toolBar);
+    inline QWidget *initToolBarNetwork(QToolBar *toolBar);
     inline void initCentralWidget(void);
     inline void initStatusBar(void);
     inline void initTrackClient(void);
@@ -29,6 +31,8 @@ private:
     QLineEdit    *lineEditHost;
     QLineEdit    *lineEditPort;
     QPushButton  *pushButtonConnect;
+    QPushButton  *pushButtonLoad;
+    QPushButton  *pushButtonSave;
     // Status Bar items
     QLabel       *labelStatus;
     // Plot widget
@@ -41,8 +45,12 @@ private:
     inline void onButtonConnectClicked();
     inline void onButtonDisconnectClicked();
     void onPushButtonConnectClicked();
+    void onPushButtonSaveClicked();
+    void onPushButtonLoadClicked();
     // Socket error event
     void onTcpSocketError(QAbstractSocket::SocketError error);
+    // New point
+    void onNewPoint(const int type, const QPointF &point);
 };
 
 #endif // MAINWINDOW_H

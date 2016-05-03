@@ -1,5 +1,16 @@
 #include "qtrackclient.h"
+#include <QFile>
+#include <QJsonParseError>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
+
+const QString QPointData::keyPoint = "points";
+const QString QPointData::keyX = "x";
+const QString QPointData::keyY = "y";
+const QString QPointData::keyAngle = "angle";
+const QString QPointData::keyTag = "tag";
 
 QTrackClient::QTrackClient(QObject *parent)
     :QTcpSocket(parent)
@@ -18,14 +29,6 @@ inline void QTrackClient::initTcpSocket()
             this, &onTcpDisconnected);
     connect(this, &QTcpSocket::readyRead,
             this, &onTcpReadyRead);
-    //
-    //
-    //
-    using SocketErrorFunc = void(QTcpSocket::*)(QAbstractSocket::SocketError);
-    connect(this,
-            static_cast<SocketErrorFunc>(&QAbstractSocket::error),
-            this,
-            &onTcpSocketError);
 }
 
 void QTrackClient::onTcpConnected()
@@ -38,7 +41,7 @@ void QTrackClient::onTcpDisconnected()
     qDebug() << Q_FUNC_INFO << __LINE__;
 }
 
-void QTrackClient::processData(QString &data)
+inline void QTrackClient::processData(QString &data)
 {
     const QString itemSep = ",";
 
@@ -58,14 +61,39 @@ void QTrackClient::processData(QString &data)
     const int angleIndex = 3;
     const int tagIndex   = 4;
 
-    long xValue      = list.at(xIndex).toLong();
-    long yValue      = list.at(yIndex).toLong();
-    long angleValue  = list.at(angleIndex).toLong();
-    long tagNo       = list.at(tagIndex).toLong();
+    const QString normalPointType = "@";
+    const QString tagPointType = "#";
+    const QString endPointType = "$";
 
-    qDebug() << Q_FUNC_INFO << __LINE__
-             << list.at(typeIndex)
-             << xValue << yValue << angleValue << tagNo;
+    QString type = list.at(typeIndex);
+    int xValue   = list.at(xIndex).toInt();
+    int yValue   = list.at(yIndex).toInt();
+
+    int angleValue = list.at(angleIndex).toInt();
+    int tagNo      = list.at(tagIndex).toInt();
+
+    Q_UNUSED(tagNo);
+    Q_UNUSED(angleValue);
+
+    qDebug() << Q_FUNC_INFO << __LINE__ << type;
+
+    int id;
+
+    if (type == normalPointType) {
+        id = 0;
+    } else if (type == tagPointType){
+        id = 1;
+    } else if (type == endPointType) {
+        id = 2;
+    } else {
+        return;
+    }
+
+    qDebug() << xValue << yValue << angleValue << tagNo;
+
+    pointData << QPointData(xValue, yValue, angleValue, tagNo);
+
+    emit newPoint(id, QPointF(xValue, yValue));
 }
 
 void QTrackClient::onTcpReadyRead()
@@ -74,24 +102,87 @@ void QTrackClient::onTcpReadyRead()
 
     forever {
         //
-        // more data
+        // If there is no more data
         //
         if (bytesAvailable() == 0) {
             break;
         }
 
-        //
-        // read line by line
-        //
         QString data = in.readLine();
 
         processData(data);
     }
 }
 
-void QTrackClient::onTcpSocketError(QAbstractSocket::SocketError error)
+inline bool QTrackClient::parseJsonFile(QJsonDocument &json)
 {
-    Q_UNUSED(error);
+    // Check the key points
+    if (!json.object().contains(QPointData::keyPoint)) {
+        return false;
+    }
 
-    qDebug() << Q_FUNC_INFO << __LINE__;
+    QJsonArray pointArray = (json.object())[QPointData::keyPoint].toArray();
+
+    for (int i = 0; i < pointArray.size(); i++) {
+        QJsonObject obj = pointArray[i].toObject();
+
+        int x     = obj[QPointData::keyX].toInt();
+        int y     = obj[QPointData::keyY].toInt();
+        int angle = obj[QPointData::keyAngle].toInt();
+        int tag   = obj[QPointData::keyTag].toInt();
+
+        qDebug() << Q_FUNC_INFO << __LINE__ << x << y << angle << tag;
+    }
+
+    return true;
+}
+
+bool QTrackClient::LoadJsonFile(const QString &fileName)
+{
+    // Open file as a JSON file
+    QFile jsonFile(fileName);
+    if (!jsonFile.open(QIODevice::ReadOnly)) {
+            return false;
+    }
+
+    // Read all data
+    QByteArray data = jsonFile.readAll();
+
+    QJsonParseError parseError;
+    QJsonDocument jsonData(QJsonDocument::fromJson(data, &parseError));
+    if (parseError.error != QJsonParseError::NoError) {
+        return false;
+    }
+
+    return parseJsonFile(jsonData);
+}
+
+bool QTrackClient::saveToJsonFile(const QString &fileName)
+{
+    // Open file as a JSON file
+    QFile jsonFile(fileName);
+    if (!jsonFile.open(QIODevice::WriteOnly)) {
+        return false;
+    }
+
+    QJsonArray pointArray;
+    QJsonObject pointObject;
+    foreach (QPointData point, pointData) {
+        pointObject[QPointData::keyX] = point.x;
+        pointObject[QPointData::keyY] = point.y;
+        pointObject[QPointData::keyAngle] = point.angle;
+        pointObject[QPointData::keyTag] = point.tag;
+
+        pointArray.append(pointObject);
+    }
+
+    QJsonObject keyPoint;
+
+    keyPoint[QPointData::keyPoint] = pointArray;
+
+    QJsonDocument jsonDoc(keyPoint);
+
+    jsonFile.write(jsonDoc.toJson());
+
+    return true;
 }
