@@ -31,8 +31,6 @@ private:
     QLineEdit    *lineEditHost;
     QLineEdit    *lineEditPort;
     QPushButton  *pushButtonConnect;
-    QPushButton  *pushButtonLoad;
-    QPushButton  *pushButtonSave;
     // Status Bar items
     QLabel       *labelStatus;
     // Plot widget

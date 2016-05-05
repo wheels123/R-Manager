@@ -97,12 +97,12 @@ inline QWidget *MainWindow::initToolBarFile(QToolBar *toolBar)
     QWidget *hBoxWidget = new QWidget(toolBar);
 
     //
-    pushButtonLoad = new QPushButton("&Load", hBoxWidget);
+    QPushButton *pushButtonLoad = new QPushButton("&Load", hBoxWidget);
 
     connect(pushButtonLoad, &QPushButton::clicked,
             this, &MainWindow::onPushButtonLoadClicked);
 
-    pushButtonSave = new QPushButton("&Save", hBoxWidget);
+    QPushButton *pushButtonSave = new QPushButton("&Save", hBoxWidget);
 
     connect(pushButtonSave, &QPushButton::clicked,
             this, &MainWindow::onPushButtonSaveClicked);
