@@ -42,6 +42,14 @@ QMainPlot::QMainPlot(QWidget *parent):
     //
     initPlotGrid();
 
+    const double xMin = -100.0;
+    const double xMax = 100.0;
+    const double yMin = -100.0;
+    const double yMax = 100.0;
+
+    setAxisScale(xBottom, xMin, xMax);
+    setAxisScale(yLeft, yMin, yMax);
+
     //
     setCanvasBackground(QColor(29, 100, 141)); // nice blue
 
