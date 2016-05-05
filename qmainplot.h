@@ -24,6 +24,7 @@ public:
     virtual QSize sizeHint() const;
 
 private:
+    inline void initLegend(void);
     inline void initPlotGrid(void);
     inline void initPlotCurve(void);
     inline void initDirectPainter(void);
@@ -39,6 +40,12 @@ public:
 public:
     void appendPoint(curveId id, const QPointF &point);
     void clearPoints(curveId id);
+
+private slots:
+    void onLegendChecked(const QVariant &itemInfo, bool on, int index);
+
+private:
+    inline void showCurve(QwtPlotItem *item, bool on);
 
 private:
     QVector<QwtPlotCurve *> vectorCurve;

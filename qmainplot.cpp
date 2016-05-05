@@ -5,6 +5,7 @@
 #include <qwt_plot_magnifier.h>
 #include <qwt_symbol.h>
 #include <qwt_painter.h>
+#include <qwt_legend.h>
 #include <QDebug>
 
 
@@ -38,6 +39,8 @@ QMainPlot::QMainPlot(QWidget *parent):
     // Align cavas into scale
     auto layout = plotLayout();
     layout->setAlignCanvasToScales(true);
+
+    initLegend();
 
     //
     initPlotGrid();
@@ -79,6 +82,18 @@ QMainPlot::~QMainPlot()
 QSize QMainPlot::sizeHint() const
 {
     return QSize(800, 600);
+}
+
+inline void QMainPlot::initLegend()
+{
+    QwtLegend *legend = new QwtLegend(this);
+    legend->setDefaultItemMode(QwtLegendData::Checkable);
+    insertLegend(legend, QwtPlot::BottomLegend);
+
+    connect(legend,
+            &QwtLegend::checked,
+            this,
+            &onLegendChecked);
 }
 
 inline void QMainPlot::initPlotGrid()
@@ -187,4 +202,23 @@ void QMainPlot::clearPoints(curveId id)
     data->clear();
 
     replot();
+}
+
+inline void QMainPlot::showCurve(QwtPlotItem *item, bool on)
+{
+    qDebug() << Q_FUNC_INFO << __LINE__ << item << on;
+
+    item->setVisible(on);
+
+    replot();
+}
+
+void QMainPlot::onLegendChecked(const QVariant &itemInfo, bool on, int index)
+{
+    Q_UNUSED(index);
+
+    QwtPlotItem *plotItem = infoToItem( itemInfo );
+    if (plotItem) {
+        showCurve(plotItem, on);
+    }
 }
