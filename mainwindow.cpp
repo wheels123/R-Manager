@@ -295,5 +295,5 @@ void MainWindow::onTcpSocketError(QAbstractSocket::SocketError error)
 //
 void MainWindow::onNewPoint(const int type, const QPointF &point)
 {
-    qDebug() << Q_FUNC_INFO << __LINE__ << type << point;
+    mainPlotLive->appendPoint((QMainPlot::curveId)type, point);
 }
