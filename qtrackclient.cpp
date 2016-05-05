@@ -63,8 +63,8 @@ inline void QTrackClient::processData(QString &data)
     const int tagIndex   = 4;
 
     const QString normalPointType = "@";
-    const QString tagPointType = "#";
-    const QString endPointType = "$";
+    const QString endPointType = "#";
+    const QString tagPointType = "$";
 
     QString type = list.at(typeIndex);
     int xValue   = list.at(xIndex).toInt();
@@ -73,13 +73,7 @@ inline void QTrackClient::processData(QString &data)
     int angleValue = list.at(angleIndex).toInt();
     int tagNo      = list.at(tagIndex).toInt();
 
-    Q_UNUSED(tagNo);
-    Q_UNUSED(angleValue);
-
-    qDebug() << Q_FUNC_INFO << __LINE__ << type;
-
     int id;
-
     if (type == normalPointType) {
         id = 0;
     } else if (type == tagPointType){
@@ -90,11 +84,18 @@ inline void QTrackClient::processData(QString &data)
         return;
     }
 
-    qDebug() << type << xValue << yValue << angleValue << tagNo;
-
+    //
+    //
+    //
     pointData << QPointData(id, xValue, yValue, angleValue, tagNo);
 
-    emit newPoint(id, QPointF(xValue, yValue));
+    //
+    //
+    //
+    const double xScale = 100.0;
+    const double yScale = 100.0;
+
+    emit newPoint(id, QPointF(xValue/xScale, yValue/yScale));
 }
 
 void QTrackClient::onTcpReadyRead()
