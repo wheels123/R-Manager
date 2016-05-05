@@ -36,7 +36,10 @@ inline QWidget *MainWindow::initToolBarNetwork(QToolBar *toolBar)
     //
     // Create a label and a edit for hostname
     //
+    const QString hostName = "192.168.1.1";
+
     lineEditHost = new QLineEdit(hBoxWidget);
+    lineEditHost->setText(hostName);
 
     QLabel *labelHost = new QLabel("&Host :", hBoxWidget);
     labelHost->setBuddy(lineEditHost);
@@ -49,7 +52,10 @@ inline QWidget *MainWindow::initToolBarNetwork(QToolBar *toolBar)
     //
     // Create a label and a edit for port
     //
+    const QString hostPort = "9999";
+
     lineEditPort = new QLineEdit(hBoxWidget);
+    lineEditPort->setText(hostPort);
     lineEditPort->setValidator(new QIntValidator(1, 65535, lineEditPort));
 
     QLabel *labelPort = new QLabel("&Port :", hBoxWidget);
