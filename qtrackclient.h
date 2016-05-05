@@ -52,9 +52,9 @@ private:
     inline void processData(QString &data);
 
 private:
-    void onTcpConnected(void);
-    void onTcpDisconnected(void);
-    void onTcpReadyRead(void);
+    void onTcpConnected();
+    void onTcpDisconnected();
+    void onTcpReadyRead();
 
 private:
     QVector<QPointData> pointData;

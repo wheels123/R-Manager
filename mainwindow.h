@@ -19,12 +19,12 @@ public:
     ~MainWindow();
 
 private:
-    inline void initToolBar(void);
+    inline void initToolBar();
     inline QWidget *initToolBarFile(QToolBar *toolBar);
     inline QWidget *initToolBarNetwork(QToolBar *toolBar);
-    inline void initCentralWidget(void);
-    inline void initStatusBar(void);
-    inline void initTrackClient(void);
+    inline void initCentralWidget();
+    inline void initStatusBar();
+    inline void initTrackClient();
 
 private:
     // Toolbar items

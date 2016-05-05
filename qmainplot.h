@@ -24,10 +24,10 @@ public:
     virtual QSize sizeHint() const;
 
 private:
-    inline void initLegend(void);
-    inline void initPlotGrid(void);
-    inline void initPlotCurve(void);
-    inline void initDirectPainter(void);
+    inline void initLegend();
+    inline void initPlotGrid();
+    inline void initPlotCurve();
+    inline void initDirectPainter();
 
 public:
     enum curveId {
