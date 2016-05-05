@@ -54,7 +54,7 @@ QMainPlot::QMainPlot(QWidget *parent):
     setAxisScale(yLeft, yMin, yMax);
 
     //
-    setCanvasBackground(QColor(29, 100, 141)); // nice blue
+    setCanvasBackground(Qt::white);
 
     initPlotCurve();
 
