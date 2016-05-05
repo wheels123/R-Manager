@@ -109,7 +109,7 @@ inline void QMainPlot::initPlotCurve(void)
     QwtPlotCurve *curve;
 
     // Normal point
-    curve = new QwtPlotCurve("Curve Normal Point");
+    curve = new QwtPlotCurve("Normal Points");
     curve->setData(new QCurveData());
     curve->setPen(Qt::red);
     curve->setStyle(QwtPlotCurve::Dots);
@@ -119,24 +119,24 @@ inline void QMainPlot::initPlotCurve(void)
     vectorCurve << curve;
 
     // Tag point
-    curve = new QwtPlotCurve("Curve Tag Point");
+    curve = new QwtPlotCurve("Tag Points");
     curve->setData(new QCurveData());
     curve->setStyle(QwtPlotCurve::NoCurve);
     curve->setSymbol(new QwtSymbol(QwtSymbol::XCross,
                                    Qt::NoBrush,
-                                   QPen(Qt::white),
+                                   QPen(Qt::blue),
                                    QSize(6, 6)));
     curve->attach(this);
 
     vectorCurve << curve;
 
     // End point
-    curve = new QwtPlotCurve("Curve Tag Point");
+    curve = new QwtPlotCurve("Table Points");
     curve->setData(new QCurveData());
     curve->setStyle(QwtPlotCurve::NoCurve);
     curve->setSymbol(new QwtSymbol(QwtSymbol::Ellipse,
                                    Qt::SolidPattern,
-                                   QPen(Qt::white),
+                                   QPen(Qt::green),
                                    QSize(6, 6)));
     curve->attach(this);
 
