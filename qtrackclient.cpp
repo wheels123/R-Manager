@@ -89,28 +89,18 @@ inline void QTrackClient::processData(QString &data)
     //
     pointData << QPointData(id, xValue, yValue, angleValue, tagNo);
 
-    //
-    //
-    //
-    const double xScale = 100.0;
-    const double yScale = 100.0;
-
-    emit newPoint(id, QPointF(xValue/xScale, yValue/yScale));
+    emit newPoint(id, QPointF(xValue, yValue));
 }
 
 void QTrackClient::onTcpReadyRead()
 {
-    QTextStream in(this);
+    while (canReadLine()) {
+        QString data = readLine();
+        if (data.isEmpty()) {
+            qDebug() << Q_FUNC_INFO << __LINE__;
 
-    forever {
-        //
-        // If there is no more data
-        //
-        if (bytesAvailable() == 0) {
             break;
         }
-
-        QString data = in.readLine();
 
         processData(data);
     }
