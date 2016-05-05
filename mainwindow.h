@@ -44,10 +44,13 @@ private:
     // Button events
     inline void onButtonConnectClicked();
     inline void onButtonDisconnectClicked();
+    inline void onNetworkError();
     void onPushButtonConnectClicked();
     void onPushButtonSaveClicked();
     void onPushButtonLoadClicked();
-    // Socket error event
+    // Socket events
+    void onTcpConnected();
+    void onTcpDisconnected();
     void onTcpSocketError(QAbstractSocket::SocketError error);
     // New point
     void onNewPoint(const int type, const QPointF &point);

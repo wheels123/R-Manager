@@ -158,6 +158,11 @@ inline void MainWindow::initTrackClient()
 {
     trackClient = new QTrackClient(this);
 
+    connect(trackClient, &QTrackClient::connected,
+            this, &onTcpConnected);
+    connect(trackClient, &QTrackClient::disconnected,
+            this, &onTcpDisconnected);
+
     using SocketErrorFunc = void(QTcpSocket::*)(QAbstractSocket::SocketError);
     connect(trackClient,
             static_cast<SocketErrorFunc>(&QAbstractSocket::error),
@@ -186,6 +191,17 @@ inline void MainWindow::onButtonDisconnectClicked()
     trackClient->disconnectFromHost();
 
     pushButtonConnect->setText("&Connect");
+}
+
+inline void MainWindow::onNetworkError()
+{
+    qDebug() << Q_FUNC_INFO << __LINE__ << pushButtonConnect->isChecked();
+
+    if (pushButtonConnect->isChecked()) {
+        pushButtonConnect->setChecked(false);
+
+        pushButtonConnect->setText("&Connect");
+    }
 }
 
 void MainWindow::onPushButtonConnectClicked()
@@ -244,11 +260,34 @@ void MainWindow::onPushButtonLoadClicked()
 //
 // Socket error event
 //
+void MainWindow::onTcpConnected()
+{
+    qDebug() << Q_FUNC_INFO << __LINE__;
+
+    labelStatus->setText("Status : connected");
+}
+
+void MainWindow::onTcpDisconnected()
+{
+    qDebug() << Q_FUNC_INFO << __LINE__;
+
+    trackClient->close();
+
+    labelStatus->setText("Status : disconnected");
+}
+
+//
+// Socket error event
+//
 void MainWindow::onTcpSocketError(QAbstractSocket::SocketError error)
 {
     Q_UNUSED(error);
 
+    trackClient->close();
+
     labelStatus->setText("Status : " + trackClient->errorString());
+
+    onNetworkError();
 }
 
 //
