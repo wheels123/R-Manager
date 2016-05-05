@@ -89,7 +89,13 @@ inline void QTrackClient::processData(QString &data)
     //
     pointData << QPointData(id, xValue, yValue, angleValue, tagNo);
 
-    emit newPoint(id, QPointF(xValue, yValue));
+    //
+    //
+    //
+    const double xScale = 100.0;
+    const double yScale = 100.0;
+
+    emit newPoint(id, QPointF(xValue/xScale, yValue/yScale));
 }
 
 void QTrackClient::onTcpReadyRead()
