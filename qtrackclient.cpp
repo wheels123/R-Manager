@@ -81,6 +81,8 @@ inline void QTrackClient::processData(QString &data)
     } else if (type == endPointType) {
         id = 2;
     } else {
+        qDebug() << Q_FUNC_INFO << __LINE__ << type;
+
         return;
     }
 
