@@ -7,6 +7,7 @@
 
 
 const QString QPointData::keyPoint = "points";
+const QString QPointData::keyType = "type";
 const QString QPointData::keyX = "x";
 const QString QPointData::keyY = "y";
 const QString QPointData::keyAngle = "angle";
@@ -89,9 +90,9 @@ inline void QTrackClient::processData(QString &data)
         return;
     }
 
-    qDebug() << xValue << yValue << angleValue << tagNo;
+    qDebug() << type << xValue << yValue << angleValue << tagNo;
 
-    pointData << QPointData(xValue, yValue, angleValue, tagNo);
+    pointData << QPointData(id, xValue, yValue, angleValue, tagNo);
 
     emit newPoint(id, QPointF(xValue, yValue));
 }
@@ -126,12 +127,13 @@ inline bool QTrackClient::parseJsonFile(QJsonDocument &json)
     for (int i = 0; i < pointArray.size(); i++) {
         QJsonObject obj = pointArray[i].toObject();
 
+        int type  = obj[QPointData::keyType].toInt();
         int x     = obj[QPointData::keyX].toInt();
         int y     = obj[QPointData::keyY].toInt();
         int angle = obj[QPointData::keyAngle].toInt();
         int tag   = obj[QPointData::keyTag].toInt();
 
-        qDebug() << Q_FUNC_INFO << __LINE__ << x << y << angle << tag;
+        qDebug() << Q_FUNC_INFO << __LINE__ << type << x << y << angle << tag;
     }
 
     return true;
@@ -168,6 +170,7 @@ bool QTrackClient::saveToJsonFile(const QString &fileName)
     QJsonArray pointArray;
     QJsonObject pointObject;
     foreach (QPointData point, pointData) {
+        pointObject[QPointData::keyType] = point.type;
         pointObject[QPointData::keyX] = point.x;
         pointObject[QPointData::keyY] = point.y;
         pointObject[QPointData::keyAngle] = point.angle;

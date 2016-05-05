@@ -8,11 +8,12 @@
 class QPointData {
 public:
     explicit QPointData() :
-        x(0), y(0), angle(0), tag(0) { };
-    QPointData(int _x, int _y, int _angle, int _tag) :
-        x(_x), y(_y), angle(_angle), tag(_tag) { };
+        type(0), x(0), y(0), angle(0), tag(0) { }
+    QPointData(int _type, int _x, int _y, int _angle, int _tag) :
+        type(_type), x(_x), y(_y), angle(_angle), tag(_tag) { }
 
 public:
+    int type;
     int x;
     int y;
     int angle;
@@ -20,6 +21,7 @@ public:
 
 public:
     static const QString keyPoint;
+    static const QString keyType;
     static const QString keyX;
     static const QString keyY;
     static const QString keyAngle;
