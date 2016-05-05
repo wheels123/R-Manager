@@ -262,8 +262,6 @@ void MainWindow::onPushButtonLoadClicked()
 //
 void MainWindow::onTcpConnected()
 {
-    qDebug() << Q_FUNC_INFO << __LINE__;
-
     labelStatus->setText("Status : connected");
 }
 
@@ -274,6 +272,8 @@ void MainWindow::onTcpDisconnected()
     trackClient->close();
 
     labelStatus->setText("Status : disconnected");
+
+    onNetworkError();
 }
 
 //
