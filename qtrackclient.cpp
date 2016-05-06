@@ -25,11 +25,11 @@ inline void QTrackClient::initTcpSocket()
     //
     //
     connect(this, &QTcpSocket::connected,
-            this, &onTcpConnected);
+            this, &QTrackClient::onTcpConnected);
     connect(this, &QTcpSocket::disconnected,
-            this, &onTcpDisconnected);
+            this, &QTrackClient::onTcpDisconnected);
     connect(this, &QTcpSocket::readyRead,
-            this, &onTcpReadyRead);
+            this, &QTrackClient::onTcpReadyRead);
 }
 
 void QTrackClient::onTcpConnected()

@@ -159,20 +159,20 @@ inline void MainWindow::initTrackClient()
     trackClient = new QTrackClient(this);
 
     connect(trackClient, &QTrackClient::connected,
-            this, &onTcpConnected);
+            this, &MainWindow::onTcpConnected);
     connect(trackClient, &QTrackClient::disconnected,
-            this, &onTcpDisconnected);
+            this, &MainWindow::onTcpDisconnected);
 
     using SocketErrorFunc = void(QTcpSocket::*)(QAbstractSocket::SocketError);
     connect(trackClient,
             static_cast<SocketErrorFunc>(&QAbstractSocket::error),
             this,
-            &onTcpSocketError);
+            &MainWindow::onTcpSocketError);
 
     connect(trackClient,
             &QTrackClient::newPoint,
             this,
-            &onNewPoint);
+            &MainWindow::onNewPoint);
 }
 
 //

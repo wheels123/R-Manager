@@ -93,7 +93,7 @@ inline void QMainPlot::initLegend()
     connect(legend,
             &QwtLegend::checked,
             this,
-            &onLegendChecked);
+            &QMainPlot::onLegendChecked);
 }
 
 inline void QMainPlot::initPlotGrid()
