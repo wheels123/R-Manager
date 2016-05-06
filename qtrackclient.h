@@ -39,7 +39,6 @@ signals:
     void newPoint(const int type, const QPointF &point);
 
 public:
-    inline bool parseJsonFile(QJsonDocument &json);
     bool LoadJsonFile(const QString &filename);
     bool saveToJsonFile(const QString &filename);
 
@@ -50,6 +49,7 @@ private:
 
 private:
     inline void processData(QString &data);
+    inline bool parseJsonFile(QJsonDocument &json);
 
 private:
     void onTcpConnected();
