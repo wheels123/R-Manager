@@ -4,7 +4,7 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_directpainter.h>
-#include <QResizeEvent>
+#include <qwt_plot_marker.h>
 #include <QVector>
 
 
@@ -26,7 +26,8 @@ public:
 private:
     inline void initLegend();
     inline void initPlotGrid();
-    inline void initPlotCurve();
+    inline void initPlotCurves();
+    inline void initPlotMarkers();
     inline void initDirectPainter();
 
 public:
@@ -50,6 +51,8 @@ private:
 private:
     QVector<QwtPlotCurve *> vectorCurve;
     QwtPlotDirectPainter   *directPainter;
+    QwtPlotMarker          *tagMarker;
+    QwtPlotMarker          *endMarker;
 };
 
 #endif // QMAINPLOT_H

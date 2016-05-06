@@ -56,7 +56,9 @@ QMainPlot::QMainPlot(QWidget *parent):
     //
     setCanvasBackground(Qt::white);
 
-    initPlotCurve();
+    initPlotCurves();
+
+    initPlotMarkers();
 
     initDirectPainter();
 
@@ -104,7 +106,7 @@ inline void QMainPlot::initPlotGrid()
     grid->attach(this);
 }
 
-inline void QMainPlot::initPlotCurve(void)
+inline void QMainPlot::initPlotCurves(void)
 {
     QwtPlotCurve *curve;
 
@@ -135,12 +137,33 @@ inline void QMainPlot::initPlotCurve(void)
     curve->setData(new QCurveData());
     curve->setStyle(QwtPlotCurve::NoCurve);
     curve->setSymbol(new QwtSymbol(QwtSymbol::Ellipse,
-                                   Qt::SolidPattern,
+                                   Qt::NoBrush,
                                    QPen(Qt::green),
                                    QSize(6, 6)));
     curve->attach(this);
 
     vectorCurve << curve;
+}
+
+inline void QMainPlot::initPlotMarkers()
+{
+    tagMarker = new QwtPlotMarker();
+    tagMarker->setValue(0.0, 0.0);
+    tagMarker->setLineStyle(QwtPlotMarker::NoLine);
+    tagMarker->setSymbol(new QwtSymbol(QwtSymbol::Rect,
+                                       Qt::NoBrush,
+                                       QPen(Qt::blue),
+                                       QSize(10, 10)));
+    tagMarker->attach(this);
+
+    endMarker = new QwtPlotMarker();
+    endMarker->setValue(10.0, 10.0);
+    endMarker->setLineStyle(QwtPlotMarker::NoLine);
+    endMarker->setSymbol(new QwtSymbol(QwtSymbol::Rect,
+                                       Qt::NoBrush,
+                                       QPen(Qt::green),
+                                       QSize(10, 10)));
+    endMarker->attach(this);
 }
 
 void QMainPlot::initDirectPainter()
