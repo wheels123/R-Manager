@@ -153,16 +153,16 @@ inline void QMainPlot::initPlotMarkers()
     tagMarker->setSymbol(new QwtSymbol(QwtSymbol::Rect,
                                        Qt::NoBrush,
                                        QPen(Qt::blue),
-                                       QSize(10, 10)));
+                                       QSize(8, 8)));
     tagMarker->attach(this);
 
     endMarker = new QwtPlotMarker();
-    endMarker->setValue(10.0, 10.0);
+    endMarker->setValue(0.0, 0.0);
     endMarker->setLineStyle(QwtPlotMarker::NoLine);
     endMarker->setSymbol(new QwtSymbol(QwtSymbol::Rect,
                                        Qt::NoBrush,
                                        QPen(Qt::green),
-                                       QSize(10, 10)));
+                                       QSize(8, 8)));
     endMarker->attach(this);
 }
 
