@@ -46,6 +46,7 @@ private slots:
     void onLegendChecked(const QVariant &itemInfo, bool on, int index);
 
 private:
+    inline void updateMarkers(curveId id, const QPointF &point);
     inline void showCurve(QwtPlotItem *item, bool on);
 
 private:

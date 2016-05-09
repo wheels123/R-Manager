@@ -112,6 +112,7 @@ inline void QMainPlot::initPlotCurves(void)
 
     // Normal point
     curve = new QwtPlotCurve("Normal Points");
+    curve->setVisible(false);
     curve->setData(new QCurveData());
     curve->setPen(Qt::red);
     curve->setStyle(QwtPlotCurve::Dots);
@@ -122,6 +123,7 @@ inline void QMainPlot::initPlotCurves(void)
 
     // Tag point
     curve = new QwtPlotCurve("Tag Points");
+    curve->setVisible(false);
     curve->setData(new QCurveData());
     curve->setStyle(QwtPlotCurve::NoCurve);
     curve->setSymbol(new QwtSymbol(QwtSymbol::XCross,
@@ -134,6 +136,7 @@ inline void QMainPlot::initPlotCurves(void)
 
     // End point
     curve = new QwtPlotCurve("Table Points");
+    curve->setVisible(false);
     curve->setData(new QCurveData());
     curve->setStyle(QwtPlotCurve::NoCurve);
     curve->setSymbol(new QwtSymbol(QwtSymbol::Ellipse,
@@ -149,6 +152,7 @@ inline void QMainPlot::initPlotMarkers()
 {
     tagMarker = new QwtPlotMarker();
     tagMarker->setValue(0.0, 0.0);
+    tagMarker->setVisible(false);
     tagMarker->setLineStyle(QwtPlotMarker::NoLine);
     tagMarker->setSymbol(new QwtSymbol(QwtSymbol::Rect,
                                        Qt::NoBrush,
@@ -158,6 +162,7 @@ inline void QMainPlot::initPlotMarkers()
 
     endMarker = new QwtPlotMarker();
     endMarker->setValue(0.0, 0.0);
+    endMarker->setVisible(false);
     endMarker->setLineStyle(QwtPlotMarker::NoLine);
     endMarker->setSymbol(new QwtSymbol(QwtSymbol::Rect,
                                        Qt::NoBrush,
@@ -179,6 +184,29 @@ void QMainPlot::initDirectPainter()
     }
 }
 
+void QMainPlot::updateMarkers(curveId id, const QPointF &point)
+{
+    switch (id) {
+    case curveNormalPoints:
+        break;
+
+    case curveTagPoints:
+        tagMarker->setValue(point);
+
+        replot();
+        break;
+
+    case curveEndPoints:
+        endMarker->setValue(point);
+
+        replot();
+        break;
+
+    default:
+        break;
+    }
+}
+
 void QMainPlot::appendPoint(curveId id, const QPointF &point)
 {
     auto curve = vectorCurve.at(id);
@@ -186,6 +214,12 @@ void QMainPlot::appendPoint(curveId id, const QPointF &point)
     QCurveData *data = static_cast<QCurveData *>(curve->data());
 
     data->append(point);
+
+    updateMarkers(id, point);
+
+    if (!curve->isVisible()) {
+        return;
+    }
 
     const bool doClip = !canvas()->testAttribute(Qt::WA_PaintOnScreen);
     if (doClip)
@@ -229,9 +263,14 @@ void QMainPlot::clearPoints(curveId id)
 
 inline void QMainPlot::showCurve(QwtPlotItem *item, bool on)
 {
-    qDebug() << Q_FUNC_INFO << __LINE__ << item << on;
-
     item->setVisible(on);
+
+    // update markers
+    if(item == vectorCurve.at(curveTagPoints)) {
+        tagMarker->setVisible(on);
+    } else if (item == vectorCurve.at(curveEndPoints)) {
+        endMarker->setVisible(on);
+    }
 
     replot();
 }
