@@ -115,7 +115,6 @@ void TwoWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
         }
     }
 ///////////////////////////////
-///////////////////////////////
 
     QVector<QVector<RobotPath>> vvrp;
 
