@@ -35,7 +35,7 @@ void TwoWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
     {
         RobotPath path = robot->getPathByIndex(i);
         QVector<RobotPathPoint> pointList = path.getNearPointById();
-        QVector<int> pointIdList = path.getNearPointIdById();
+        //QVector<int> pointIdList = path.getNearPointIdById();
         RobotPoint point = path.curPose;
 
         bool ret1=false,ret2=false,ret3=false;
