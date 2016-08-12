@@ -139,6 +139,7 @@ void OneWayRegion::setControl(Robot *robot)
             RobotPath p = findSafeRobot(rp_no_edit);
             activeRobot.append(p);
         }
+#if 0
         else
         {
             bool safe = isRobotSafe(rp_no_edit,rp.at(0));
@@ -163,7 +164,7 @@ void OneWayRegion::setControl(Robot *robot)
             }
 
         }
-
+#endif
         int index=-1;
         robot->findPathIndexById(activeRobot.at(0).robotId,0,index);
 
