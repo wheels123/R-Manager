@@ -19,7 +19,7 @@ class TwoWayRegion
 {
 #define safe_dis_same_road 1.8
 #define safe_dis_go_across 1.0
-#define safe_dis_need_no_ctrl 2.99
+#define safe_dis_need_no_ctrl 3.0
 public:
     TwoWayRegion();
 private:
