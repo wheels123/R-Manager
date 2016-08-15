@@ -232,6 +232,10 @@ bool Robot::insertRobotStateByIndex(int index,RobotPoint point,double left,doubl
     {
       m.pathIdToGo= m.point.at(goPathIndex).mainPathId;
     }
+    else
+    {
+       m.pathIdToGo=0;
+    }
     m.curPose=point;
     //m.pathIdToGo=goMainPathId;
     m.robotState=(RobotPath::RobotState)robotState;
@@ -479,11 +483,11 @@ QString Robot::robotStateToString(int index)
     RobotPath rp= path.at(index);
 
     str.append(" CP ");
-    str.append(QString::number(rp.curPose.x,'f',3));
+    str.append(QString::number(rp.curPose.x,'f',2));
     str.append(" ");
-    str.append(QString::number(rp.curPose.y,'f',3));
+    str.append(QString::number(rp.curPose.y,'f',2));
     str.append(" ");
-    str.append(QString::number(rp.curPose.phi,'f',3));
+    str.append(QString::number(rp.curPose.phi,'f',2));
     str.append(" L ");
     str.append(QString::number(rp.leftSpeed,'f',1));
     str.append(" R ");

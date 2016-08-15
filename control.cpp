@@ -61,7 +61,6 @@ void Manager::setRegion(QVector<EditShapeItem *> shapeItem, QCurveDataCus *path,
     //qDebug() << "Manager setRegion end\n";
 }
 
-
 OneWayRegion * Manager::findOneWayRegion(EditShapeItem * item,bool &ok)
 {
     ok=false;
@@ -75,6 +74,7 @@ OneWayRegion * Manager::findOneWayRegion(EditShapeItem * item,bool &ok)
     }
     return NULL;
 }
+
 
 TwoWayRegion * Manager::findTwoWayRegion(EditShapeItem * item,bool &ok)
 {

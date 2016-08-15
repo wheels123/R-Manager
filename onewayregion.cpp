@@ -11,6 +11,14 @@ void OneWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
     QVector<QwtPointCus> pathIn;
     QVector<RobotPath> robotIn;
 
+    qDebug() << "activeRobot start  ";
+
+    for(int j=0;j<activeRobot.size();j++)
+    {
+        RobotPath p=activeRobot.at(j);
+        qDebug() << "id "<<QString::number(p.robotId,10)<<" "<<QString::number(p.curPose.x,'f',3)<<" "<<QString::number(p.curPose.y,'f',3);
+    }
+
     QVector<QVector<QwtPointCus>>().swap(vectorPath);
     QVector<QVector<RobotPath>>().swap(vectorRobot);
     shapeItem = region;
@@ -98,25 +106,7 @@ void OneWayRegion::setControl(Robot *robot)
     QVector<RobotPath> rp_no_edit=vectorRobot.at(0);
     controlRegion.resize(rp.size());
 
-    /*
-    if(rp.size()==1)
-    {
-        QVector<RobotPath>().swap(activeRobot);
-        activeRobot.append(rp.at(0));
-        int index=-1;
-        robot->findPathIndexById(robotId,0,index);
-        if(ret == false)//new robot all stop
-        {
-            newRobotNum++;
-            rp.erase(rp.begin()+i);
-            if(index!=-1&&index<control.size())
-            {
 
-            }
-        }
-        return;//需设为行走
-    }
-*/
 
     RobotPath rpFirst=rp.at(0);
     //删除新出现的机器人并设为停止
@@ -144,7 +134,7 @@ void OneWayRegion::setControl(Robot *robot)
         }
     }
 
-    if(rp.size()<=1) //上次活动机器人这次又出现的个数为0或1 则选择的一个为活动
+    if(rp.size()==0) //上次活动机器人这次又出现的个数为0或1 则选择的一个为活动
     {
         QVector<RobotPath>().swap(activeRobot);
         if(rp.size()==0)
@@ -152,219 +142,53 @@ void OneWayRegion::setControl(Robot *robot)
             RobotPath p = findSafeRobot(rp_no_edit);
             activeRobot.append(p);
         }
-#if 0
+
+        int index=-1;
+        robot->findPathIndexById(activeRobot.at(0).robotId,0,index);
+
+        if(index!=-1&&index<control.size())
+        {
+
+           robot->setRobotControl(index,1);
+           qDebug() << "run first safe robot id "<<QString::number(activeRobot.at(0).robotId,10);
+        }
         else
         {
-            bool safe = isRobotSafe(rp_no_edit,rp.at(0));
-            if(safe==true)
+            qDebug() <<"robot id not exist";
+        }
+
+    }
+    else if(rp.size()==1&&activeRobot.size()==1) //上次活动机器人这次又出现的个数为0或1 则选择的一个为活动
+    {
+        if(rp.at(0).robotId!=activeRobot.at(0).robotId)
+        {
+             qDebug() <<"never reached robotid not equa";
+        }
+        else
+        {
+            int index=-1;
+            robot->findPathIndexById(activeRobot.at(0).robotId,0,index);
+
+            if(index!=-1&&index<control.size())
             {
-                activeRobot.append(rp.at(0));
+
+               robot->setRobotControl(index,1);
+               qDebug() << "run last robot id "<<QString::number(activeRobot.at(0).robotId,10);
             }
             else
             {
-                int index=-1;
-                robot->findPathIndexById(rp.at(0).robotId,0,index);
-
-                if(index!=-1&&index<control.size())
-                {
-
-                   robot->setRobotControl(index,0);
-                   qDebug() << "stop unsafe last valid id "<<QString::number(rp.at(0).robotId,10);
-                }
-                RobotPath p = findSafeRobot(rp_no_edit);
-                qDebug() << "findSafeRobot id "<<QString::number(p.robotId,10);
-                activeRobot.append(p);
+                qDebug() <<"robot id not exist";
             }
-
         }
-#endif
-        int index=-1;
-        robot->findPathIndexById(activeRobot.at(0).robotId,0,index);
 
-        if(index!=-1&&index<control.size())
-        {
 
-           robot->setRobotControl(index,1);
-           qDebug() << "run first id "<<QString::number(activeRobot.at(0).robotId,10);
-        }
-        //stop stoped by other region
-        qDebug() <<"stop stoped by other region";
-            for(int i=0;i<control.size();i++)
-            {
-                if(control.at(i)==0)
-                {
-                    qDebug() << "mast stop i "<<QString::number(i,10)<<" id "<<QString::number(robot->getPathRobotIdByIndex(i),10);
-                    robot->setRobotControl(i,0);
-                }
-            }
-        qDebug() <<"stop stoped by other region end";
-        return;//需设为行走
     }
-
-    //上次活动机器人这次又出现的个数>1
-
-    RobotPath rpFirstAct=rp.at(0);
-    QVector<RobotPath> rp_act_no_edit=rp;
-    controlRegion.resize(rp.size());
-    qDebug() << "controlRegion size "<<QString::number(controlRegion.size(),10);
-    for(int i=0;i<rp.size();i++)
+    else
     {
-        controlRegion[i]=1;
+        //never reached
+        qDebug() <<"never reached active robot >1";
     }
 
-    for(int i=0;i<rp.size()-1;i++)
-    {
-        for(int j=i+1;j<rp.size();j++)
-        {
-            qDebug() << "OneWayRegion setControl 5 id "<<QString::number(i,10)<<""<<QString::number(j,10);
-            RobotPath robotPathi = rp.at(i);
-            RobotPoint curPosei = robotPathi.curPose;
-            int curIdGoi = robotPathi.pathIdToGo;
-            QVector<RobotPathPoint> robotPathNeari = robotPathi.getNearPointById(curIdGoi);
-            RobotPoint curDestPointi=robotPathNeari.at(1).point;
-            RobotPath::RobotState robotStatei=robotPathi.robotState;
-            bool stopi=false;
-            int indexi=-1;
-            int findIndexi = robot->findPathIndexById(robotPathi.robotId,0,indexi);
-
-            RobotPath robotPathj = rp.at(j);
-            RobotPoint curPosej = robotPathj.curPose;
-            int curIdGoj = robotPathj.pathIdToGo;
-            QVector<RobotPathPoint> robotPathNearj = robotPathj.getNearPointById(curIdGoj);
-            RobotPoint curDestPointj=robotPathNearj.at(1).point;
-            RobotPath::RobotState robotStatej=robotPathj.robotState;
-            bool stopj=false;
-            int indexj=-1;
-            int findIndexj = robot->findPathIndexById(robotPathj.robotId,0,indexj);
-
-            int front;
-
-            if(robotStatei==RobotPath::AtStartPoint||robotStatei==RobotPath::AtDestPoint)
-            {
-                stopi=true;
-            }
-            else
-            {
-                stopi=false;
-            }
-            if(robotStatej==RobotPath::AtStartPoint||robotStatej==RobotPath::AtDestPoint)
-            {
-                stopj=true;
-            }
-            else
-            {
-                stopj=false;
-            }
-
-            int mode=0;
-            if(stopi==false&&stopj==false)
-            {
-                mode=0;
-            }
-            else if(stopi==false&&stopj==true)
-            {
-                mode=1;
-            }
-            else if(stopi==true&&stopj==false)
-            {
-                mode=2;
-            }
-            else
-            {
-                mode=3;
-            }
-
-            if(mode==3) continue; //all stop do not need control
-
-
-            front = frontRobot(curPosei,curDestPointi,curPosej,curDestPointj,mode);
-
-
-
-            //在后面的停 则不用判断mode
-           // if(mode==0)//都在行走
-            {
-                if(front==0)// 方向相反 但不会交叉 无需控制
-                {
-
-                }
-                else if(front==1)//i 在前 j停
-                {
-                    if(indexj!=-1&&indexj<control.size())
-                    {
-                        //control[indexj]=0;
-                        robot->setRobotControl(indexj,0);
-                        controlRegion[j]=0;
-                        qDebug() << "stop id "<<QString::number(robotPathj.robotId,10)<<" front id "<<QString::number(robotPathi.robotId,10);
-                    }
-                }
-                else if(front==2)//j 在前 i停
-                {
-                    if(indexi!=-1&&indexi<control.size())
-                    {
-                        //control[indexi]=0;
-                        robot->setRobotControl(indexi,0);
-                        controlRegion[i]=0;
-                        qDebug() << "stop id "<<QString::number(robotPathi.robotId,10)<<" front id "<<QString::number(robotPathj.robotId,10);
-                    }
-                }
-                else if(front==3)//反向 交叉 不允许发生 暂且i停
-                {                
-                    bool ret = safeRobot(curPosei,curPosej);
-                    if(ret==1)
-                    {
-                        if(indexj!=-1&&indexj<control.size())
-                        {
-                            //control[indexi]=0;
-                            robot->setRobotControl(indexj,0);
-                            controlRegion[j]=0;
-                            qDebug() << "stop id "<<QString::number(robotPathj.robotId,10)<<" cross with "<<QString::number(robotPathj.robotId,10);
-                        }
-                    }
-                    else
-                    {
-                        if(indexi!=-1&&indexi<control.size())
-                        {
-                            //control[indexi]=0;
-                            robot->setRobotControl(indexi,0);
-                            controlRegion[i]=0;
-                            qDebug() << "stop id "<<QString::number(robotPathi.robotId,10)<<" cross with "<<QString::number(robotPathi.robotId,10);
-                        }
-
-                    }
-                }
-            }
-
-        }
-
-    }
-
-
-    QVector<RobotPath>().swap(activeRobot);
-    for(int i=0;i<rp.size();i++)
-    {
-        if(controlRegion[i]==1)
-        {
-            activeRobot.append(rp.at(i));
-        }
-    }
-
-    if(activeRobot.size()==0)
-    {
-        RobotPath p = findSafeRobot(rp_act_no_edit);
-        activeRobot.append(p);
-        //activeRobot.append(rpFirstAct);
-        int index=-1;
-        robot->findPathIndexById(activeRobot.at(0).robotId,0,index);
-
-        if(index!=-1&&index<control.size())
-        {
-           //control[index]=1;
-           robot->setRobotControl(index,1);
-           qDebug() << "run first act id "<<QString::number(activeRobot.at(0).robotId,10);
-        }
-        return;//需设为行走
-    }
 //stop stoped by other region
 //qDebug() <<"stop stoped by other region";
     for(int i=0;i<control.size();i++)
@@ -392,6 +216,7 @@ void OneWayRegion::setControl(Robot *robot)
     {
         qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(ctrl.at(i),10);
     }
+
 }
 
 int OneWayRegion::frontRobot(RobotPoint a,RobotPoint da, RobotPoint b,RobotPoint db,int mode)

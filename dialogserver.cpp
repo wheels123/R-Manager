@@ -43,9 +43,9 @@ DialogServer::~DialogServer()
         pathname.append(QString::number(robot->getPathRobotIdByIndex(i),10));
         pathname.append(" ID ");
         pathname.append(QString::number(robot->getPathIdByIndex(i),10));
-        pathname.append(" MaxNum ");
+        pathname.append(" MN ");
         pathname.append(QString::number(robot->getPathPointNumMax(i),10));
-        pathname.append(" Num ");
+        pathname.append(" N ");
         pathname.append(QString::number(robot->getPathPointNum(i),10));
 
         pathname.append(robot->robotStateToString(i));
