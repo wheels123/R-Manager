@@ -40,9 +40,22 @@ void OneWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
     {
         vectorPath.append(pathIn);
     }
+
     if(robotIn.size()>0)
     {
         vectorRobot.append(robotIn);
+    }
+    else
+    {
+        qDebug() << "robotIn nothing";
+        return;
+    }
+
+    qDebug() << "robotIn size "<<QString::number(robotIn.size(),10);
+    for(int m=0;m<robotIn.size();m++)
+    {
+       RobotPath rpm = robotIn.at(m);
+       qDebug() << "robotIn i "<<QString::number(m,10)<<"id "<<QString::number(rpm.robotId,10);
     }
 
     //qDebug() << "setRegion id "<<QString::number(region->id(),10)<<" vectorPath num "<<QString::number(vectorPath.size(),10);
@@ -56,15 +69,15 @@ void OneWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
             //qDebug() << "id "<<QString::number(p.id(),10)<<" "<<QString::number(p.x(),'f',3)<<" "<<QString::number(p.y(),'f',3);
         }
     }
-    //qDebug() << "setRegion id "<<QString::number(region->id(),10)<<" vectorRobot num "<<QString::number(vectorRobot.size(),10);
+    qDebug() << "setRegion id "<<QString::number(region->id(),10)<<" vectorRobot num "<<QString::number(vectorRobot.size(),10);
     for(int i=0;i<vectorRobot.size();i++)
     {
-        //qDebug() << "i "<<QString::number(i,10);
+        qDebug() << "i "<<QString::number(i,10);
         QVector<RobotPath> vp=vectorRobot.at(i);
         for(int j=0;j<vp.size();j++)
         {
             RobotPath p=vp.at(j);
-            //qDebug() << "robot id "<<QString::number(p.robotId,10)<<" "<<QString::number(p.curPose.x,'f',3)<<" "<<QString::number(p.curPose.y,'f',3);
+            qDebug() << "robot id "<<QString::number(p.robotId,10)<<" "<<QString::number(p.curPose.x,'f',3)<<" "<<QString::number(p.curPose.y,'f',3);
         }
     }
 
@@ -193,7 +206,7 @@ void OneWayRegion::setControl(Robot *robot)
     RobotPath rpFirstAct=rp.at(0);
     QVector<RobotPath> rp_act_no_edit=rp;
     controlRegion.resize(rp.size());
-
+    qDebug() << "controlRegion size "<<QString::number(controlRegion.size(),10);
     for(int i=0;i<rp.size();i++)
     {
         controlRegion[i]=1;
@@ -353,7 +366,7 @@ void OneWayRegion::setControl(Robot *robot)
         return;//需设为行走
     }
 //stop stoped by other region
-qDebug() <<"stop stoped by other region";
+//qDebug() <<"stop stoped by other region";
     for(int i=0;i<control.size();i++)
     {
         if(control.at(i)==0)
@@ -362,7 +375,7 @@ qDebug() <<"stop stoped by other region";
             robot->setRobotControl(i,0);
         }
     }
-qDebug() <<"stop stoped by other region end";
+//qDebug() <<"stop stoped by other region end";
 
     qDebug() << "Oneway active robot ";
     for(int i=0;i<activeRobot.size();i++)
@@ -370,6 +383,14 @@ qDebug() <<"stop stoped by other region end";
         qDebug() << "i "<<QString::number(i,10);
         RobotPath rp=activeRobot.at(i);
         qDebug() << "robot id "<<QString::number(rp.robotId,10)<<" "<<QString::number(rp.curPose.x,'f',3)<<" "<<QString::number(rp.curPose.y,'f',3);
+    }
+
+
+    QVector<int> ctrl = robot->getRobotControl();
+    qDebug() << "ctrl size "<<QString::number(ctrl.size(),10);
+    for(int i=0;i<ctrl.size();i++)
+    {
+        qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(ctrl.at(i),10);
     }
 }
 

@@ -12,6 +12,9 @@ void Manager::setRegion(QVector<EditShapeItem *> shapeItem, QCurveDataCus *path,
     for(int i=0;i<shapeItem.size();i++)
     {
         EditShapeItem *item=shapeItem.at(i);
+
+        qDebug() << "shapeItem i "<<QString::number(i,10)<<"id "<<QString::number(item->id(),10);
+
         if(item->type()==EditShapeItem::OneWay)
         {
             bool ok;
@@ -47,6 +50,12 @@ void Manager::setRegion(QVector<EditShapeItem *> shapeItem, QCurveDataCus *path,
                 twoWayRegion.append(region);
             }
             qDebug() << "TwoWayRegion setControl end\n";
+        }
+        QVector<int> ctrl = robot->getRobotControl();
+        qDebug() << "last ctrl size "<<QString::number(ctrl.size(),10);
+        for(int i=0;i<ctrl.size();i++)
+        {
+            qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(ctrl.at(i),10);
         }
     }
     //qDebug() << "Manager setRegion end\n";

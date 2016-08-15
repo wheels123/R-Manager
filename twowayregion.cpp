@@ -61,6 +61,15 @@ void TwoWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
        RobotPath rpm = robotIn.at(m);
        qDebug() << "robotIn i "<<QString::number(m,10)<<"id "<<QString::number(rpm.robotId,10);
     }
+    if(robotIn.size()>0)
+    {
+
+    }
+    else
+    {
+        qDebug() << "robotIn nothing";
+        return;
+    }
 ///////////////////////////
     robot->resetAllPathRobotId(0);
     for(int i=0;i<robotIn.size();i++)
@@ -263,15 +272,15 @@ void TwoWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
             //qDebug() << "robot id "<<QString::number(p.robotId,10)<<" "<<QString::number(p.curPose.x,'f',3)<<" "<<QString::number(p.curPose.y,'f',3);
         }
     }
-    //qDebug() << "setRegion id "<<QString::number(region->id(),10)<<" vectorRobot2 num "<<QString::number(vectorRobot.size(),10);
+    qDebug() << "setRegion id "<<QString::number(region->id(),10)<<" vectorRobot2 num "<<QString::number(vectorRobot.size(),10);
     for(int i=0;i<vectorRobot.size();i++)
     {
-        //qDebug() << "i "<<QString::number(i,10);
+        qDebug() << "i "<<QString::number(i,10);
         QVector<RobotPath> vp=vectorRobot.at(i);
         for(int j=0;j<vp.size();j++)
         {
             RobotPath p=vp.at(j);
-            //qDebug() << "robot id "<<QString::number(p.robotId,10)<<" "<<QString::number(p.curPose.x,'f',3)<<" "<<QString::number(p.curPose.y,'f',3);
+            qDebug() << "robot id "<<QString::number(p.robotId,10)<<" "<<QString::number(p.curPose.x,'f',3)<<" "<<QString::number(p.curPose.y,'f',3);
         }
     }
     qDebug() << "setRegion end\n";
@@ -607,6 +616,7 @@ void TwoWayRegion::setControl(Robot *robot)
 
 
     QVector<int> ctrl = robot->getRobotControl();
+    qDebug() << "ctrl size "<<QString::number(ctrl.size(),10);
     for(int i=0;i<ctrl.size();i++)
     {
         qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(ctrl.at(i),10);
