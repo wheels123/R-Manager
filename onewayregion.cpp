@@ -33,7 +33,7 @@ void OneWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
             pathIn.append(point);
         }
     }
-
+/*
     for(int i=0;i<robot->getPathNum();i++)
     {
         RobotPath path = robot->getPathByIndex(i);
@@ -43,7 +43,32 @@ void OneWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
             robotIn.append(path);
         }
     }
+    */
+//
+    for(int i=0;i<robot->getPathNum();i++)
+    {
+        RobotPath path = robot->getPathByIndex(i);
+        QVector<RobotPathPoint> pointList = path.getNearPointById();
+        //QVector<int> pointIdList = path.getNearPointIdById();
+        RobotPoint point = path.curPose;
 
+        bool ret1=false,ret2=false,ret3=false;
+        ret1=shapeItem->pointInPolygon(QPointF(point.x,point.y));
+        if(pointList.size()>=3)
+        {
+            ret2=shapeItem->pointInPolygon(QPointF(pointList.at(1).point.x,pointList.at(1).point.y));
+            //ret3=shapeItem->pointInPolygon(QPointF(pointList.at(2).point.x,pointList.at(2).point.y));
+        }
+        //qDebug() << "path id "<<QString::number(path.robotId,10)<<"go id "<<QString::number(path.pathIdToGo,10);
+        //qDebug() << "pointInPolygon 1 "<<QString::number(ret1,10);
+        //qDebug() << "pointInPolygon 2 "<<QString::number(ret2,10)<<"go id "<<QString::number(pointIdList.at(1),10);
+        //qDebug() << "pointInPolygon 3 "<<QString::number(ret3,10)<<"go id "<<QString::number(pointIdList.at(2),10);
+        if(ret1||ret2||ret3)
+        {
+            robotIn.append(path);
+        }
+    }
+//
     if(pathIn.size()>0)
     {
         vectorPath.append(pathIn);

@@ -61,10 +61,22 @@ DialogServer::~DialogServer()
         }
         qstmodel->appendRow(item);
     }
+    QStandardItemModel *oldmodel= dynamic_cast< QStandardItemModel *>(ui->treeViewPath->model());
     ui->treeViewPath->setModel(qstmodel);
     ui->treeViewPath->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeViewPath->setAutoFillBackground(true);
     ui->treeViewPath->expandAll();
+    if(oldmodel)
+    {
+        int a=oldmodel->columnCount();
+        int b=oldmodel->rowCount();
+        qDebug()<<"oldmodel:"<<QString::number(a,10)<<" "<<QString::number(b,10);
+        oldmodel->clear();
+         a=oldmodel->columnCount();
+         b=oldmodel->rowCount();
+        qDebug()<<"oldmodel2:"<<QString::number(a,10)<<" "<<QString::number(b,10);
+        delete oldmodel;
+    }
  }
 
  void DialogServer::updateTreeViewMainPath(Robot* robot)
