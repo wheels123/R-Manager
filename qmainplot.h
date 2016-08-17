@@ -111,6 +111,7 @@ public:
     QCurveDataCus* getPathData();
     QCurveDataCus* getDestData();
     QCurveDataCus* getLabelData();
+    QCurveData* getNormalData_t();
     void addReceiveDataToLoadData(bool useLabelId);
     void autoConnect(double autoConnectDis,double autoConnectDisMax);
     void showPose(QVector<RobotPoint> vrp,int n);
@@ -144,7 +145,8 @@ public:
     void deleteShapeItem(int id);
     //bool pointInPolygon(QPointF point,QPolygonF polygon);
     void highLightShapeItem(QPointF p);
-
+    void loadData_t(QCurveDataCus *data);
+    void showPose(QVector<QVector<RobotPathPoint>> vvrp);
 private slots:
     void onLegendChecked(const QVariant &itemInfo, bool on, int index);
 
@@ -172,6 +174,8 @@ private:
 
     EditShapeItem * shapeItem;
     QVector<EditShapeItem *> shapeItemList;
+
+    QwtPlotCurve * CurveNormal_t;
 };
 
 #endif // QMAINPLOT_H

@@ -318,6 +318,8 @@ public:
      int findPathIndexById(int robotId);
      bool checkMovableById(int robotId);
      bool checkMovableByIndex(int index);
+     QVector<QVector<RobotPathPoint>> getPose();
+     void estimateRobotPose();
 public:
 
 private:
@@ -329,6 +331,8 @@ private:
 
     QVector<RobotPoint> vectorPoseA;
     QVector<RobotPoint> vectorPoseB;
+
+    QVector<QVector<RobotPathPoint>> vectorPose;
 };
 
 #endif // ROBOT_H

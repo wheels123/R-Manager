@@ -27,17 +27,8 @@ MainWindow::MainWindow(QWidget *parent)
     initDialog();
 
     initTrackServer();
+
     initManager();
-
-
-    QVector<int> a;
-    a.append(1);
-    a.append(2);
-    QVector<int> b=a;
-    a[0]=3;
-    a[1]=4;
-qDebug() << "a  "<<QString::number(a.at(0),10);
-qDebug() << "b  "<<QString::number(b.at(0),10);
 }
 
 MainWindow::~MainWindow()
@@ -565,6 +556,7 @@ inline void MainWindow::initTrackServer()
             this,
             &MainWindow::onNewPointServer);
 
+
 }
 //
 // Button event
@@ -781,6 +773,8 @@ void MainWindow::onPushButtonLoadClicked()
         if(data!=NULL)
         {
             mainPlotLive->loadData(data,QwtPointCus::Normal);
+            //mainPlotLive->loadData_t(data);
+
         }
         else
         {
@@ -1417,10 +1411,14 @@ void MainWindow::timerEvent( QTimerEvent *event )
     {
         if(server)
         {
+            /*
             QVector<RobotPoint> ra = server->getPose(0);
             QVector<RobotPoint> rb = server->getPose(1);
             mainPlotLive->showPose(ra,0);
             mainPlotLive->showPose(rb,1);
+            */
+            QVector<QVector<RobotPathPoint>> pose=server->getPose();
+            mainPlotLive->showPose(pose);
 
         }
         //qDebug()<<"manager ";

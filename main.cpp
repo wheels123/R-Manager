@@ -44,7 +44,6 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
     outFile.open(QIODevice::WriteOnly | QIODevice::Append);
     QTextStream ts(&outFile);
     ts <<QString(QString::fromLocal8Bit(message.c_str()))<< endl;
-
 }
 
 int main(int argc, char *argv[])
@@ -53,6 +52,5 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
-
     return a.exec();
 }

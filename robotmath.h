@@ -14,6 +14,7 @@ public:
         double	right);
     int safeRobot(RobotPoint a,RobotPoint b);
     double estimateMinDis(RobotPoint a,double la,double ra,RobotPoint b,double lb,double rb);
+    int safeRobot(RobotPoint a,RobotPoint b,double &da,double &db);
 };
 
 #endif // ROBOTMATH_H

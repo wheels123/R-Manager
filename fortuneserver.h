@@ -344,7 +344,8 @@ public:
     int deletePathWithClientList();
     void sendSNOK(QTcpSocket* socket,int sn);
     void sendControlCmd(QTcpSocket* socket,int cmd);
-     QVector<RobotPoint> getPose(int n);
+    QVector<RobotPoint> getPose(int n);
+    QVector<QVector<RobotPathPoint>> getPose();
 signals:
     void newConnection(ClientSocketList* list, const QTcpSocket *socket,ClientSocketList::clientStatus status);
     void updataRobotPathServer(Robot* robot);

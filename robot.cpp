@@ -1381,6 +1381,11 @@ bool Robot::controlRun(int indexA,int indexB,int& ctrlA,int &ctrlB)
     }
  }
 
+ QVector<QVector<RobotPathPoint>> Robot::getPose()
+ {
+    return vectorPose;
+ }
+
  void Robot::estimateRobotPose(int num)
  {
      const int n=5;
@@ -1432,7 +1437,39 @@ bool Robot::controlRun(int indexA,int indexB,int& ctrlA,int &ctrlB)
      }
  }
 
+void Robot::estimateRobotPose()
+{
+    const int n=5;
+    int num = path.size();
 
+    QVector<QVector<RobotPathPoint>>().swap(vectorPose);
+
+     for(int i=0;i<path.size();i++)
+     {
+         QVector<RobotPathPoint> vectorPoseA;
+         RobotPathPoint a;
+         a.point=path.at(i).curPose;
+         a.d_robotId=path.at(i).robotId;
+         double l=path.at(i).leftSpeed;
+         double r=path.at(i).rightSpeed;
+
+         vectorPoseA.append(a);
+         RobotPoint rpa;
+         RobotPathPoint b;
+         rpa=a.point;
+         b.d_robotId=a.d_robotId;
+         for(int i=1;i<n;i++)
+         {
+             RobotPoint d;
+
+             computeFromEncoder(d,l,r);
+             rpa=rpa+d;
+             b.point=rpa;
+             vectorPoseA.append(b);
+         }
+         vectorPose.append(vectorPoseA);
+     }
+ }
 
  //k=0.167*3.1415926/4000/9.28; //安装北阳的餐车
 

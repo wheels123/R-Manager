@@ -156,3 +156,60 @@ int RobotMath::safeRobot(RobotPoint a,RobotPoint b)
       //qDebug() <<"ret 1";
     }
 }
+
+int RobotMath::safeRobot(RobotPoint a,RobotPoint b,double &da,double &db)
+{
+    const int n=20;
+    const double step=0.1;
+    double min_dis_a2b=MAX_DIS;
+    double min_dis_b2a=MAX_DIS;
+    da=MAX_DIS;
+    db=MAX_DIS;
+    for(int i=2;i<n;i++)
+    {
+        RobotPoint d,ea,eb;
+        d.x=step*i;
+        d.y=0;
+        d.phi=0;
+        ea=a+d;
+        eb=b;
+        double x=ea.x-eb.x;
+        double y=ea.y-eb.y;
+        double dis = sqrt(x*x+y*y);
+
+        if(dis<min_dis_a2b)
+        {
+            min_dis_a2b=dis;
+        }
+    }
+    for(int i=2;i<n;i++)
+    {
+        RobotPoint d,ea,eb;
+        d.x=step*i;
+        d.y=0;
+        d.phi=0;
+        ea=a;
+        eb=b+d;
+        double x=ea.x-eb.x;
+        double y=ea.y-eb.y;
+        double dis = sqrt(x*x+y*y);
+
+        if(dis<min_dis_b2a)
+        {
+            min_dis_b2a=dis;
+        }
+    }
+    //qDebug() << "safeRobot "<<QString::number(min_dis_a2b,'f',3)<<" "<<QString::number(min_dis_b2a,'f',3);
+    da=min_dis_a2b;
+    db=min_dis_b2a;
+    if(min_dis_a2b<min_dis_b2a)
+    {
+      return 2;
+      //qDebug() <<"ret 2";
+    }
+    else
+    {
+      return 1;
+      //qDebug() <<"ret 1";
+    }
+}

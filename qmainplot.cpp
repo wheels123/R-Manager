@@ -83,7 +83,7 @@ QMainPlot::QMainPlot(QWidget *parent):
         markerShow[i]=false;
     }
 
-
+/*
     QwtPlotCurve *curveCus1=new QwtPlotCurve("P1");
     curveCus1->setVisible(true);
     curveCus1->setData(new QCurveData());
@@ -118,8 +118,8 @@ QMainPlot::QMainPlot(QWidget *parent):
                                    QSize(5, 5)));
     curveCus3->attach(this);
     vectorCurvePose<<curveCus3;
+    */
     //delete(curveCus1);
-
 
 
     //EditShapeItem *newShapeItem = new EditShapeItem(QString("Item"));
@@ -139,6 +139,7 @@ QMainPlot::~QMainPlot()
     delete CurveNormal;
     delete CurveLabel;
     delete CurvePath;
+    delete CurveNormal_t;
 
 }
 void QMainPlot::setCanvasColor( const QColor &c )
@@ -176,6 +177,18 @@ inline void QMainPlot::initPlotCurves(void)
     ////////////////////////////////////
     /// \brief curveCus
     ///
+    ///
+
+    CurveNormal_t = new QwtPlotCurve("Nomal_t");
+    CurveNormal_t->setVisible(false);
+    CurveNormal_t->setData(new QCurveData());
+    CurveNormal_t->setStyle(QwtPlotCurve::NoCurve);
+    CurveNormal_t->setSymbol(new QwtSymbol(QwtSymbol::Ellipse,
+                                   Qt::NoBrush,
+                                   QPen(Qt::red),
+                                   QSize(4, 4)));
+    CurveNormal_t->attach(this);
+
     CurveNormal = new QwtPlotCurveCus("Nomal");
     CurveNormal->setVisible(false);
     CurveNormal->setData(new QCurveDataCus());
@@ -737,6 +750,11 @@ void QMainPlot::insertCurve( Qt::Orientation o,
     curve->attach( this );
 }
 
+QCurveData* QMainPlot::getNormalData_t()
+{
+    QCurveData *dataCus = static_cast<QCurveData *>(CurveNormal_t->data());
+    return dataCus;
+}
 
 QCurveDataCus* QMainPlot::getNormalData()
 {
@@ -923,6 +941,55 @@ void QMainPlot::loadData(QCurveDataCus *data,QwtPointCus::PointStyle type)
     }
 }
 
+void QMainPlot::loadData_t(QCurveDataCus *data)
+{
+    if(data==NULL) return;
+    int sizeLoad=data->size();
+    if(sizeLoad<1) return;
+
+    QwtPlotCurve *curve=NULL;
+
+    curve = CurveNormal_t;
+
+    QCurveData *data_t = static_cast<QCurveData *>(curve->data());
+    int size=data->size();
+
+    int sizeLoadTotalNeed=0;//=sizeLoad*sizeLoad+sizeLoad;
+
+
+    sizeLoadTotalNeed=sizeLoad;
+
+    int numNeedAdd=0;
+    if(sizeLoadTotalNeed<=size)
+    {
+      numNeedAdd=0;
+    }
+    else
+    {
+      numNeedAdd=sizeLoadTotalNeed-size;
+    }
+
+    QwtPointCus pointCus(QwtPointCus::PointStyle::Label,0,0,0,0);
+    QPointF point;
+    /*
+    for(int i=0;i<numNeedAdd;i++)
+    {
+        data_t->append(point);
+    }
+*/
+    for(int i=0;i<sizeLoad;i++)
+    {
+        pointCus=data->sample(i);
+        point.rx()=pointCus.x();
+        point.ry()=pointCus.y();
+        //data_t->set(i,point);
+        data_t->append(point);
+    }
+
+    curve->setSamples( data_t );
+    curve->attach( this );
+}
+
 void QMainPlot::showPose(QVector<RobotPoint> vrp,int n)
 {
     if(n>=vectorCurvePose.size()) return;
@@ -988,6 +1055,103 @@ void QMainPlot::showPose(QVector<RobotPoint> vrp,int n)
     replot();
     plotCanvas->setPaintAttribute( QwtPlotCanvas::ImmediatePaint, false );
 }
+
+
+void QMainPlot::showPose(QVector<QVector<RobotPathPoint>> vvrp)
+{
+    int num=vvrp.size();
+    if(num<=0)return;
+
+    Qt::GlobalColor color[30]={Qt::red,Qt::green,Qt::blue,Qt::cyan,Qt::magenta,Qt::yellow,Qt::darkRed,Qt::darkGreen,Qt::darkBlue,Qt::darkCyan,Qt::darkMagenta,Qt::darkYellow};
+
+    int poseNum=vectorCurvePose.size();
+    if(poseNum<num)
+    {
+        for(int i=0;i<num-poseNum;i++)
+        {
+            QVector<RobotPathPoint> vrp = vvrp.at(poseNum+i);
+            int rid=0;
+            if(vrp.size()>0)
+            {
+                rid=vrp.at(0).getRobotId();
+            }
+            QString name = "P"+QString::number(rid,10);
+            QwtPlotCurve *curveCus=new QwtPlotCurve(name);
+            curveCus->setVisible(true);
+            curveCus->setData(new QCurveData());
+            curveCus->setStyle(QwtPlotCurve::NoCurve);
+            int n=(poseNum+i)%12;
+            Qt::GlobalColor c=color[n];
+            curveCus->setSymbol(new QwtSymbol(QwtSymbol::Ellipse,
+                                           Qt::NoBrush,
+                                           QPen(c),
+                                           QSize(5, 5)));
+            curveCus->attach(this);
+            vectorCurvePose.append(curveCus);
+        }
+    }
+
+    QPointF point;
+
+    for(int i=0;i<vectorCurvePose.size();i++)
+    {
+        QwtPlotCurve *curveCus=vectorCurvePose.at(i);
+        QCurveData *dataCus = static_cast<QCurveData *>(curveCus->data());
+
+        QVector<RobotPathPoint> vrp = vvrp.at(i);
+
+        dataCus->clear();
+        for(int i=0;i<vrp.size();i++)
+        {
+            point.setX(vrp.at(i).point.x);
+            point.setY(vrp.at(i).point.y);
+            dataCus->append(point);
+        }
+
+        if (!curveCus->isVisible()) {
+            curveCus->setVisible(true);
+        }
+        const bool doClip = !canvas()->testAttribute(Qt::WA_PaintOnScreen);
+        if (doClip)
+        {
+            /*
+               Depending on the platform setting a clip might be an important
+               performance issue. F.e. for Qt Embedded this reduces the
+               part of the backing store that has to be copied out - maybe
+               to an unaccelerated frame buffer device.
+             */
+            const QwtScaleMap xMap = canvasMap(curveCus->xAxis());
+            const QwtScaleMap yMap = canvasMap(curveCus->yAxis());
+
+            QRegion clipRegion;
+
+            const QSize symbolSize = curveCus->symbol()->size();
+            QRect r(0, 0, symbolSize.width() + 2, symbolSize.height() + 2);
+
+            const QPointF center =
+                    QwtScaleMap::transform(xMap, yMap, point);
+            r.moveCenter(center.toPoint());
+
+            clipRegion += r;
+
+            directPainter->setClipRegion(clipRegion);
+        }
+
+        directPainter->drawSeries(curveCus, 0, dataCus->size()-1);
+        curveCus->setSamples(curveCus->data());
+        curveCus->attach( this );
+    }
+
+
+
+    QwtPlotCanvas *plotCanvas =
+        qobject_cast<QwtPlotCanvas *>( canvas() );
+
+    plotCanvas->setPaintAttribute( QwtPlotCanvas::ImmediatePaint, true );
+    replot();
+    plotCanvas->setPaintAttribute( QwtPlotCanvas::ImmediatePaint, false );
+}
+
 
 
 inline void QMainPlot::addCover(const QPointF &point)

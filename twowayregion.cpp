@@ -45,6 +45,19 @@ void TwoWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
             ret2=shapeItem->pointInPolygon(QPointF(pointList.at(1).point.x,pointList.at(1).point.y));
             ret3=shapeItem->pointInPolygon(QPointF(pointList.at(2).point.x,pointList.at(2).point.y));
         }
+
+        if(ret1)
+        {
+            path.id=1;
+        }
+        else if(ret2)
+        {
+            path.id=2;
+        }
+        else if(ret3)
+        {
+            path.id=3;
+        }
         //qDebug() << "path id "<<QString::number(path.robotId,10)<<"go id "<<QString::number(path.pathIdToGo,10);
         //qDebug() << "pointInPolygon 1 "<<QString::number(ret1,10);
         //qDebug() << "pointInPolygon 2 "<<QString::number(ret2,10)<<"go id "<<QString::number(pointIdList.at(1),10);
@@ -71,6 +84,7 @@ void TwoWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
         return;
     }
 ///////////////////////////
+    /*
     robot->resetAllPathRobotId(0);
     for(int i=0;i<robotIn.size();i++)
     {
@@ -161,7 +175,7 @@ void TwoWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
             qDebug() << "i "<<QString::number(i,10)<< "j "<<QString::number(i,10)<<"path id"<<QString::number(rp.robotId,10);
         }
     }
-
+*/
 ///////////////////////////////////
 
     bool pathInPointValid=pathPointInRegionValid(pathIn);
@@ -469,7 +483,22 @@ void TwoWayRegion::setControl(Robot *robot)
     int ctrlMode=2;
     QVector<int> control = robot->getRobotControl();
 
-    if(vectorRobot.size()>1) ctrlMode=2;
+    if(robotIn.size()>1) ctrlMode=2;
+    if(ctrlMode==2)
+    {
+        for(int i=0;i<robotIn.size();i++)
+        {
+            int robotId = robotIn.at(i).robotId;
+            int index = robot->findPathIndexById(robotId);
+            int ctrl = robot->getRobotControl(index);
+            if(ctrl==1)
+            {
+               robot->setRobotControl(index,2);
+               qDebug() << "change ctrl 2 id "<<QString::number(robotId,10);
+            }
+        }
+    }
+
     #if 0
     for(int i=0;i<vectorRobot.size();i++)
     {
@@ -578,7 +607,9 @@ void TwoWayRegion::setControl(Robot *robot)
             }
             else
             {
-                int ret = m_math.safeRobot(rpm.curPose,rpn.curPose);
+                //int ret = m_math.safeRobot(rpm.curPose,rpn.curPose);
+                double  da,db;
+                int ret = m_math.safeRobot(rpm.curPose,rpn.curPose,da,db);
                 int index=-1;
                 int robotId=0;
                 if(ret==1)
@@ -602,11 +633,34 @@ void TwoWayRegion::setControl(Robot *robot)
                 }
                 else
                 {
-                    index = robot->findPathIndexById(robotId);
-                    if(index!=-1&&index<control.size())
+                    double dis = m_math.estimateMinDis(rpm.curPose,rpm.leftSpeed,rpm.rightSpeed,rpn.curPose,rpn.leftSpeed,rpn.rightSpeed);
+                    bool needCtrl=true;
+                    if(ret==1)
                     {
-                       robot->setRobotControl(index,0);
-                       qDebug() << "stop unsafe robot id "<<QString::number(robotId,10);
+                        if(rpn.id!=1 && dis>0.5 && movableN)
+                        {
+                            needCtrl=false;
+                        }
+                    }
+                    else
+                    {
+                        if(rpm.id!=1 && dis>0.5 && movableM)
+                        {
+                            needCtrl=false;
+                        }
+                    }
+                    if(needCtrl)
+                    {
+                        index = robot->findPathIndexById(robotId);
+                        if(index!=-1&&index<control.size())
+                        {
+                           robot->setRobotControl(index,0);
+                           qDebug() << "stop unsafe robot id "<<QString::number(robotId,10);
+                        }
+                    }
+                    else
+                    {
+                        qDebug() << "not need to stop unsafe robot id "<<QString::number(robotId,10);
                     }
                 }
 

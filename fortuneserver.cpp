@@ -491,6 +491,12 @@ void FortuneServer::robotMsg(QString str)
      return robot.getPose(n);
  }
 
+ QVector<QVector<RobotPathPoint>> FortuneServer::getPose()
+ {
+     robot.estimateRobotPose();
+     return robot.getPose();
+ }
+
  void FortuneServer::onNewPoint(const QwtPointCus point)
  {
      emit newPointServer(point);
