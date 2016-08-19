@@ -268,7 +268,7 @@ void OneWayRegion::setControl(Robot *robot)
         QVector<RobotPath>().swap(activeRobot);
 
         //RobotPath p = findSafeRobot(rp_no_edit);
-        p = findSafeRobot(rp_no_edit,robot);
+        RobotPath p = findSafeRobot(rp_no_edit,robot);
 
         activeRobot.append(p);
 
@@ -615,15 +615,15 @@ RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp,Robot *robot)
     if(vrp.size()==1) {
         return vrp.at(0);
     }
-
+    qDebug() << "findSafeRobot 1";
     rp=vrp.at(0);
     movable.resize(vrp.size());
     distSort.resize(vrp.size());
     robotSort.resize(vrp.size());
     for(int i=0;i<distSort.size();i++)
     {
-        distSort.append(MAX_DIS);
-        robotSort.append(vrp.at(i));
+        distSort[i] = MAX_DIS;
+        robotSort[i] = vrp.at(i);
     }
     for(int i=0;i<vrp.size();i++)
     {
@@ -640,10 +640,9 @@ RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp,Robot *robot)
             RobotPoint p2=rp2.curPose;
             //bool movable1=valid.at(i);
             //bool movable2=valid.at(j);
-            double l1=rp1.point.x;
-            double r1=rp1.point.y;
-            //double l2=rp2.point.x;
-            //double r2=rp2.point.y;
+            double l1=rp1.leftSpeed;
+            double r1=rp1.rightSpeed;
+
             double dis = m_math.estimateMinDisA2B(p1,l1,r1,p2);
             if(min_dis>dis&&dis>0.3)
             {
@@ -652,7 +651,7 @@ RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp,Robot *robot)
         }
         distSort[i]=min_dis;
     }
-
+    qDebug() << "findSafeRobot 2";
     for(int i=0;i<robotSort.size()-1;i++)
     {
         for(int j=i+1;j<robotSort.size();j++)
@@ -671,13 +670,13 @@ RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp,Robot *robot)
             }
         }
     }
-
+    qDebug() << "findSafeRobot 3";
     for(int i=0;i<movable.size();i++)
     {
         bool movableM = robot->checkMovableById(robotSort.at(i).robotId);
-        movable.append(movableM);
+        movable[i] = movableM;
     }
-
+    qDebug() << "findSafeRobot 4";
     //sorted dis and robot
     bool findMovableAndIn=false;
     bool findIn=false;
@@ -691,7 +690,7 @@ RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp,Robot *robot)
             break;
         }
     }
-
+    qDebug() << "findSafeRobot 5";
     if(findMovableAndIn==false)
     {
         for(int i=0;i<robotSort.size();i++)
@@ -721,7 +720,7 @@ RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp,Robot *robot)
             }
         }
     }
-
+    qDebug() << "findSafeRobot 6";
     return rp;
 }
 
