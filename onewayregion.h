@@ -4,6 +4,7 @@
 
 #include "fortuneserver.h"
 #include "qmainplot.h"
+#include "robotmath.h"
 class OneWayRegion
 {
 #define safe_dis_to_be_front 0.8
@@ -14,6 +15,7 @@ private:
     QVector<QVector<QwtPointCus>> vectorPath;
     QVector<QVector<RobotPath>> vectorRobot;
     QVector<RobotPath> activeRobot;
+    RobotMath m_math;
 
 public:
     void setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *robot);
@@ -28,6 +30,9 @@ public:
     int getRegionId();
     bool isRobotSafe(QVector<RobotPath> vrp,RobotPath rp);
     int safeRobot(RobotPoint a,RobotPoint b);
+    RobotPath findSafeRobotIn(QVector<RobotPath> vrp,bool& ok);
+    RobotPath findSafeRobotIn(QVector<RobotPath> vrp,Robot *robot,bool& ok);
+    RobotPath findSafeRobot(QVector<RobotPath> vrp,Robot *robot);
 };
 
 #endif // ONEWAYREGION_H

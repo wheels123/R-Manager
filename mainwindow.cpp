@@ -786,9 +786,7 @@ void MainWindow::onPushButtonLoadClicked()
 
     labelStatus->setText(message);
 
-
     mainPlotLive->LoadJsonFile(fileName);
-
 }
 
 void MainWindow::onPushButtonLoadNormalClicked()
@@ -1411,12 +1409,12 @@ void MainWindow::timerEvent( QTimerEvent *event )
     {
         if(server)
         {
-            /*
+/*
             QVector<RobotPoint> ra = server->getPose(0);
             QVector<RobotPoint> rb = server->getPose(1);
             mainPlotLive->showPose(ra,0);
             mainPlotLive->showPose(rb,1);
-            */
+*/
             QVector<QVector<RobotPathPoint>> pose=server->getPose();
             mainPlotLive->showPose(pose);
 

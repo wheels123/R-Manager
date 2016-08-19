@@ -109,7 +109,8 @@ public:
     {
         int n=vectorSocket.size();
         if(n<=0) return 0;
-        if(index>n-1) return 0;
+        if(index>n-1||index<0) return 0;
+        if(vectorSocketSerialNumber.size()!=vectorSocket.size()) return 0;
         vectorSocket.erase(vectorSocket.begin()+index);
         vectorSocketState.erase(vectorSocketState.begin()+index);
         vectorSocketSerialNumber.erase(vectorSocketSerialNumber.begin()+index);
@@ -119,7 +120,8 @@ public:
     int deleteClient(QTcpSocket *skt)
     {
         bool find=false;
-        for (int i = 0; i < vectorSocket.count();) {
+        if(vectorSocketSerialNumber.size()!=vectorSocket.size()) return 0;
+        for (int i = 0; i < vectorSocket.size();) {
             QTcpSocket* l_socket = vectorSocket.at(i);
 
             if((l_socket->peerAddress().toString()==skt->peerAddress().toString())&&(l_socket->peerPort()==skt->peerPort()))
@@ -140,7 +142,8 @@ public:
     int deleteClient(QString str, int port)
     {
         bool find=false;
-        for (int i = 0; i < vectorSocket.count();) {
+        if(vectorSocketSerialNumber.size()!=vectorSocket.size()) return 0;
+        for (int i = 0; i < vectorSocket.size();) {
             QTcpSocket* l_socket = vectorSocket.at(i);
 
             if((l_socket->peerAddress().toString()==str)&&(l_socket->peerPort()==port))
@@ -162,7 +165,7 @@ public:
     {
         bool find=false;
         int i=0;
-        for (i = 0; i < vectorSocket.count();i++) {
+        for (i = 0; i < vectorSocket.size();i++) {
             QTcpSocket* l_socket = vectorSocket.at(i);
 
             if((l_socket->peerAddress().toString()==skt->peerAddress().toString())&&(l_socket->peerPort()==skt->peerPort()))
@@ -178,7 +181,7 @@ public:
     {
         bool find=false;
         int i=0;
-        for (i = 0; i < vectorSocket.count();i++) {
+        for (i = 0; i < vectorSocket.size();i++) {
             QTcpSocket* l_socket = vectorSocket.at(i);
 
             if((l_socket->peerAddress().toString()==str)&&(l_socket->peerPort()==port))
@@ -194,7 +197,8 @@ public:
     int findSNFromSocket(QTcpSocket *skt)
     {
         int i=0;
-        for (i = 0; i < vectorSocket.count();i++) {
+        if(vectorSocketSerialNumber.size()!=vectorSocket.size()) return -1;
+        for (i = 0; i < vectorSocket.size();i++) {
             QTcpSocket* l_socket = vectorSocket.at(i);
 
             if((l_socket->peerAddress().toString()==skt->peerAddress().toString())&&(l_socket->peerPort()==skt->peerPort()))
@@ -221,7 +225,7 @@ public:
     int getSNByIndex(int index)
     {
         int num=vectorSocketSerialNumber.size();
-        if(index>=num) return -1;
+        if(index>=num||index<0) return -1;
         int sn = vectorSocketSerialNumber.at(index);
         return sn;
     }
@@ -235,7 +239,7 @@ public:
         bool find=false;
         int i=0;
         if(vectorSocketState.size()!=vectorSocket.size()) return -1;
-        for (i = 0; i < vectorSocket.count();i++) {
+        for (i = 0; i < vectorSocket.size();i++) {
             QTcpSocket* l_socket = vectorSocket.at(i);
 
             if((l_socket->peerAddress().toString()==skt->peerAddress().toString())&&(l_socket->peerPort()==skt->peerPort()))
@@ -254,7 +258,7 @@ public:
         bool find=false;
         int i=0;
         if(vectorSocketSerialNumber.size()!=vectorSocket.size()) return -1;
-        for (i = 0; i < vectorSocket.count();i++) {
+        for (i = 0; i < vectorSocket.size();i++) {
             QTcpSocket* l_socket = vectorSocket.at(i);
 
             if((l_socket->peerAddress().toString()==skt->peerAddress().toString())&&(l_socket->peerPort()==skt->peerPort()))
@@ -278,7 +282,7 @@ public:
     QTcpSocket* getClientVecByIndex(int index)
     {
         int num=vectorSocket.size();
-        if(index>=num) return NULL;
+        if(index>=num||index<0) return NULL;
         QTcpSocket* skt = vectorSocket.at(index);
         return skt;
     }
@@ -286,7 +290,8 @@ public:
     {
         QTcpSocket* skt=NULL;
         int i=0;
-        for (i = 0; i < vectorSocketSerialNumber.count();i++) {
+        if(vectorSocketSerialNumber.size()!=vectorSocket.size()) return skt;
+        for (i = 0; i < vectorSocketSerialNumber.size();i++) {
             int t_sn = vectorSocketSerialNumber.at(i);
             if(t_sn==sn)
             {
@@ -313,7 +318,7 @@ public:
     clientStatus getStatusByIndex(int index)
     {
         int num=vectorSocketState.size();
-        if(index>=num) return (clientStatus)0;
+        if(index>=num||index<0) return (clientStatus)0;
         clientStatus sta = vectorSocketState.at(index);
         return sta;
     }

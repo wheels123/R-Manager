@@ -622,7 +622,26 @@ void TwoWayRegion::setControl(Robot *robot)
                 }
                 bool movableM = robot->checkMovableById(rpm.robotId);
                 bool movableN = robot->checkMovableById(rpn.robotId);
+                int curCtrlStateM=2,curCtrlStateN=2;
+
+                int indexM=-1;
+                robot->findPathIndexById(rpm.robotId,0,indexM);
+
+                if(indexM!=-1&&indexM<control.size())
+                {
+                   curCtrlStateM=control.at(indexM);
+                }
+
+                int indexN=-1;
+                robot->findPathIndexById(rpn.robotId,0,indexN);
+
+                if(indexN!=-1&&indexN<control.size())
+                {
+                    curCtrlStateN=control.at(indexN);
+                }
+
                 qDebug()<<"safeRobot"<<QString::number(ret,10)<<"movableM"<<QString::number(movableM,10)<<"movableN"<<QString::number(movableN,10);
+                qDebug()<<"curStateM"<<QString::number(curCtrlStateM,10)<<"curStateN"<<QString::number(curCtrlStateN,10);
                 if(ret==1&&movableM==false&&movableN==true) //no ctrl
                 {
                     qDebug() << "no ctrl b";
@@ -630,6 +649,22 @@ void TwoWayRegion::setControl(Robot *robot)
                 else if(ret==2&&movableM==true&&movableN==false) //no ctrl
                 {
                     qDebug() << "no ctrl c";
+                }
+                else if(ret==1&&estDis>0.5&&directDis>0.6&&movableN==true&&db>0.5)
+                {
+                    qDebug() << "no ctrl d";
+                }
+                else if(ret==2&&estDis>0.5&&directDis>0.6&&movableM==true&&da>0.5)
+                {
+                    qDebug() << "no ctrl e";
+                }
+                else if(ret==1&&estDis>0.4&&movableN==true&&curCtrlStateM==0)//
+                {
+                    qDebug() << "no ctrl f";
+                }
+                else if(ret==2&&estDis>0.4&&movableM==true&&curCtrlStateN==0)//
+                {
+                    qDebug() << "no ctrl g";
                 }
                 else
                 {
@@ -668,6 +703,14 @@ void TwoWayRegion::setControl(Robot *robot)
         }
     }
 
+    for(int i=0;i<control.size();i++)
+    {
+        if(control.at(i)==0)
+        {
+            qDebug() << "mast stop i "<<QString::number(i,10)<<" id "<<QString::number(robot->getPathRobotIdByIndex(i),10);
+            robot->setRobotControl(i,0);
+        }
+    }
 
     QVector<int> ctrl = robot->getRobotControl();
     qDebug() << "ctrl size "<<QString::number(ctrl.size(),10);

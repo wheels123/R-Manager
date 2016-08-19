@@ -53,8 +53,8 @@ DialogServer::~DialogServer()
         QStandardItem* item    = new QStandardItem(pathname);
         QStringList list = robot->pathToString(i);
 
-        int pointNum=robot->getPathPointNum(i);
-        for(int j=0;j<pointNum;j++)
+        //int pointNum=robot->getPathPointNum(i);
+        for(int j=0;j<list.size();j++)
         {
            QStandardItem* itemSub    = new QStandardItem(list.at(j));
            item->appendRow(itemSub);

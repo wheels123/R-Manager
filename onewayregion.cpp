@@ -59,6 +59,19 @@ void OneWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
             ret2=shapeItem->pointInPolygon(QPointF(pointList.at(1).point.x,pointList.at(1).point.y));
             //ret3=shapeItem->pointInPolygon(QPointF(pointList.at(2).point.x,pointList.at(2).point.y));
         }
+
+        if(ret1)
+        {
+            path.id=1;
+        }
+        else if(ret2)
+        {
+            path.id=2;
+        }
+        else if(ret3)
+        {
+            path.id=3;
+        }
         //qDebug() << "path id "<<QString::number(path.robotId,10)<<"go id "<<QString::number(path.pathIdToGo,10);
         //qDebug() << "pointInPolygon 1 "<<QString::number(ret1,10);
         //qDebug() << "pointInPolygon 2 "<<QString::number(ret2,10)<<"go id "<<QString::number(pointIdList.at(1),10);
@@ -91,6 +104,7 @@ void OneWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
        qDebug() << "robotIn i "<<QString::number(m,10)<<"id "<<QString::number(rpm.robotId,10);
     }
 
+    /*
     //qDebug() << "setRegion id "<<QString::number(region->id(),10)<<" vectorPath num "<<QString::number(vectorPath.size(),10);
     for(int i=0;i<vectorPath.size();i++)
     {
@@ -98,10 +112,11 @@ void OneWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
         QVector<QwtPointCus> vp=vectorPath.at(i);
         for(int j=0;j<vp.size();j++)
         {
-            QwtPointCus p=vp.at(j);
+            //QwtPointCus p=vp.at(j);
             //qDebug() << "id "<<QString::number(p.id(),10)<<" "<<QString::number(p.x(),'f',3)<<" "<<QString::number(p.y(),'f',3);
         }
     }
+    */
     qDebug() << "setRegion id "<<QString::number(region->id(),10)<<" vectorRobot num "<<QString::number(vectorRobot.size(),10);
     for(int i=0;i<vectorRobot.size();i++)
     {
@@ -120,7 +135,7 @@ void OneWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
 void OneWayRegion::setControl(Robot *robot)
 {
     qDebug() << "OneWayRegion setControl start";
-    if(vectorRobot.size()==0) return;
+    if(vectorRobot.size()<=0) return;
 
     int robotNum=vectorRobot.at(0).size();
     if(robotNum==0) return;
@@ -131,11 +146,99 @@ void OneWayRegion::setControl(Robot *robot)
     QVector<RobotPath> rp_no_edit=vectorRobot.at(0);
     controlRegion.resize(rp.size());
 
-
-
     RobotPath rpFirst=rp.at(0);
+
+/*
+    int num_all=rp.size();
+    int num_in=0;
+    int num_act=activeRobot.size();
+    for(int i=0;i<num_all;i++)
+    {
+        if(rp.at(i).id==1)
+        {
+            num_in++;
+        }
+    }
+
+    if(num_in==0)
+    {
+        qDebug() <<"no robot abs in";
+    }
+    else
+    {
+        if(num_act==0)
+        {
+            QVector<RobotPath>().swap(activeRobot);
+        }
+        else if(num_act==1)
+        {
+            bool ret = findRobotById(activeRobot.at(0));
+            if(ret==false)
+            {
+                qDebug() <<"active robot not in delete";
+                QVector<RobotPath>().swap(activeRobot);
+            }
+        }
+            bool ok=false;
+            RobotPath p = findSafeRobotIn(rp_no_edit,ok);
+
+            if(!ok)
+            {
+               p = findSafeRobot(rp_no_edit);
+               qDebug() <<"never reached no robot abs in";
+            }
+            activeRobot.append(p);
+
+            int index=-1;
+            robot->findPathIndexById(activeRobot.at(0).robotId,0,index);
+
+            if(index!=-1&&index<control.size())
+            {
+
+               robot->setRobotControl(index,1);
+               qDebug() << "run first safe robot id "<<QString::number(activeRobot.at(0).robotId,10);
+            }
+            else
+            {
+                qDebug() <<"robot id not exist";
+            }
+        }
+        else if(num_act==1)
+        {
+            bool ret = findRobotById(activeRobot.at(0));
+            if(ret==false)
+            {
+                qDebug() <<"active robot not in del";
+
+            }
+        }
+        else
+        {
+            qDebug() <<"never reached active robot >1";
+        }
+    }
+    */
+
+    int num_all=rp.size();
+    int num_in=0;
+    int num_act=activeRobot.size();
+    for(int i=0;i<num_all;i++)
+    {
+        if(rp.at(i).id==1)
+        {
+            num_in++;
+        }
+    }
+
+
     //删除新出现的机器人并设为停止
     int newRobotNum=0;
+
+    if(num_in==0)
+    {
+         QVector<RobotPath>().swap(activeRobot);
+    }
+
     for(int i=0;i<rp.size();i)
     {
         int robotId = rp.at(i).robotId;
@@ -159,14 +262,15 @@ void OneWayRegion::setControl(Robot *robot)
         }
     }
 
+
     if(rp.size()==0) //上次活动机器人这次又出现的个数为0或1 则选择的一个为活动
     {
         QVector<RobotPath>().swap(activeRobot);
-        if(rp.size()==0)
-        {
-            RobotPath p = findSafeRobot(rp_no_edit);
-            activeRobot.append(p);
-        }
+
+        //RobotPath p = findSafeRobot(rp_no_edit);
+        p = findSafeRobot(rp_no_edit,robot);
+
+        activeRobot.append(p);
 
         int index=-1;
         robot->findPathIndexById(activeRobot.at(0).robotId,0,index);
@@ -181,6 +285,7 @@ void OneWayRegion::setControl(Robot *robot)
         {
             qDebug() <<"robot id not exist";
         }
+
 
     }
     else if(rp.size()==1&&activeRobot.size()==1) //上次活动机器人这次又出现的个数为0或1 则选择的一个为活动
@@ -501,6 +606,203 @@ bool OneWayRegion::findRobotById(int id)
     return false;
 }
 
+RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp,Robot *robot)
+{
+    RobotPath rp;
+    QVector<bool> movable;
+    QVector<double> distSort;
+    QVector<RobotPath> robotSort;
+    if(vrp.size()==1) {
+        return vrp.at(0);
+    }
+
+    rp=vrp.at(0);
+    movable.resize(vrp.size());
+    distSort.resize(vrp.size());
+    robotSort.resize(vrp.size());
+    for(int i=0;i<distSort.size();i++)
+    {
+        distSort.append(MAX_DIS);
+        robotSort.append(vrp.at(i));
+    }
+    for(int i=0;i<vrp.size();i++)
+    {
+        double min_dis=MAX_DIS;
+        for(int j=0;j<vrp.size();j++)
+        {
+            if(j==i)
+            {
+                continue;//不比较自己
+            }
+            RobotPath rp1=vrp.at(i);
+            RobotPath rp2=vrp.at(j);
+            RobotPoint p1=rp1.curPose;
+            RobotPoint p2=rp2.curPose;
+            //bool movable1=valid.at(i);
+            //bool movable2=valid.at(j);
+            double l1=rp1.point.x;
+            double r1=rp1.point.y;
+            //double l2=rp2.point.x;
+            //double r2=rp2.point.y;
+            double dis = m_math.estimateMinDisA2B(p1,l1,r1,p2);
+            if(min_dis>dis&&dis>0.3)
+            {
+                min_dis=dis;
+            }
+        }
+        distSort[i]=min_dis;
+    }
+
+    for(int i=0;i<robotSort.size()-1;i++)
+    {
+        for(int j=i+1;j<robotSort.size();j++)
+        {
+            if(distSort.at(i)<distSort.at(j)&&distSort.at(j)<MAX_DIS-1)
+            {
+                double t_dis;
+                RobotPath t_rp;
+                t_dis=distSort[i];
+                distSort[i]=distSort[j];
+                distSort[j]=t_dis;
+
+                t_rp=robotSort[i];
+                robotSort[i]=robotSort[j];
+                robotSort[j]=t_rp;
+            }
+        }
+    }
+
+    for(int i=0;i<movable.size();i++)
+    {
+        bool movableM = robot->checkMovableById(robotSort.at(i).robotId);
+        movable.append(movableM);
+    }
+
+    //sorted dis and robot
+    bool findMovableAndIn=false;
+    bool findIn=false;
+    bool findMovable=false;
+    for(int i=0;i<robotSort.size();i++)
+    {
+        if(movable.at(i)&&robotSort.at(i).id==1)
+        {
+            findMovableAndIn=true;
+            rp=robotSort.at(i); //movable and dis max and in
+            break;
+        }
+    }
+
+    if(findMovableAndIn==false)
+    {
+        for(int i=0;i<robotSort.size();i++)
+        {
+            if(robotSort.at(i).id==1)
+            {
+                findIn=true;
+                rp=robotSort.at(i); //movable and dis max
+                break;
+            }
+        }
+        if(findIn==false)
+        {
+            for(int i=0;i<robotSort.size();i++)
+            {
+                if(movable.at(i))
+                {
+                    findMovable=true;
+                    rp=robotSort.at(i); //movable and dis max
+                    break;
+                }
+            }
+
+            if(findMovable==false)
+            {
+                rp=robotSort.at(0);
+            }
+        }
+    }
+
+    return rp;
+}
+
+RobotPath OneWayRegion::findSafeRobotIn(QVector<RobotPath> vrp,Robot *robot,bool& ok)
+{
+    RobotPath rp;
+    QVector<bool> valid;
+    ok=false;
+    if(vrp.size()==1) {
+        return vrp.at(0);
+    }
+    valid.resize(vrp.size());
+
+    for(int i=0;i<vrp.size();i++)
+    {
+        bool movableM = robot->checkMovableById(vrp.at(i).robotId);
+        valid.append(movableM);
+    }
+    for(int i=0;i<vrp.size();i++)
+    {
+        for(int j=i+1;j<vrp.size();j++)
+        {
+             RobotPoint p1=vrp.at(i).curPose;
+             RobotPoint p2=vrp.at(j).curPose;
+             int ret = safeRobot(p1,p2);
+             int id1=vrp.at(i).id;
+             int id2=vrp.at(j).id;
+             bool valid1=valid.at(i);
+             bool valid2=valid.at(j);
+             if(id1==1&&id2==1)
+             {
+                 if(valid1&&!valid2)
+                 {
+                    rp=vrp.at(i);ok=true;
+                 }
+                 else if(!valid1&&valid2)
+                 {
+                    rp=vrp.at(j);ok=true;
+                 }
+                 else if(valid1&&valid2)
+                 {
+                     int ret = safeRobot(p1,p2);
+                     if(ret==2)
+                     {
+                        rp=vrp.at(j);
+                        valid[i]=false;
+                     }
+                     else
+                     {
+                        rp=vrp.at(i);
+                        valid[j]=false;
+                     }
+                     ok=true;
+                 }
+                 else
+                 {
+
+                 }
+             }
+             else if(id1==1&&id2!=1)
+             {
+                 rp=vrp.at(i);
+                 valid[j]=false;
+                 ok=true;
+             }
+             else if(id1!=1&&id2==1)
+             {
+                 rp=vrp.at(j);
+                 valid[i]=false;
+                 ok=true;
+             }
+             else
+             {
+                 ok=false;
+             }
+        }
+    }
+    return rp;
+}
+/*
+
 RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp)
 {
     RobotPath rp;
@@ -526,7 +828,54 @@ RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp)
     }
     return rp;
 }
+*/
+RobotPath OneWayRegion::findSafeRobotIn(QVector<RobotPath> vrp,bool& ok)
+{
+    RobotPath rp;
+    ok=false;
+    if(vrp.size()==1) {
+        return vrp.at(0);
+    }
+    for(int i=0;i<vrp.size();i++)
+    {
+        for(int j=i+1;j<vrp.size();j++)
+        {
+             RobotPoint p1=vrp.at(i).curPose;
+             RobotPoint p2=vrp.at(j).curPose;
+             int ret = safeRobot(p1,p2);
+             int id1=vrp.at(i).id;
+             int id2=vrp.at(j).id;
 
+             if(id1==1&&id2==1)
+             {
+                 if(ret==2)
+                 {
+                    rp=vrp.at(j);
+                 }
+                 else
+                 {
+                    rp=vrp.at(i);
+                 }
+                 ok=true;
+             }
+             else if(id1==1&&id2!=1)
+             {
+                 rp=vrp.at(i);
+                 ok=true;
+             }
+             else if(id1!=1&&id2==1)
+             {
+                 rp=vrp.at(j);
+                 ok=true;
+             }
+             else
+             {
+                 ok=false;
+             }
+        }
+    }
+    return rp;
+}
 
 int OneWayRegion::getRegionId()
 {

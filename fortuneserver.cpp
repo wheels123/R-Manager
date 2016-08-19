@@ -76,7 +76,7 @@ FortuneServer::~FortuneServer()
 //! [1]
 void FortuneServer::incomingConnection(qintptr socketDescriptor)
 {
-    QString fortune = fortunes.at(qrand() % fortunes.size());
+    //QString fortune = fortunes.at(qrand() % fortunes.size());
 
     /*
     FortuneThread *thread = new FortuneThread(socketDescriptor, fortune, this);
@@ -420,7 +420,7 @@ void FortuneServer::timerEvent( QTimerEvent *event )
     //qDebug() <<"FortuneServer timer event "<<QString::number(a.size(),10)<<QString::number(robot.getPathNum(),10);
     if(a.size()!=robot.getPathNum()) return;
 
-    for(int i=0;i<robot.getPathNum();i++)
+    for(int i=0;i<a.size();i++)
     {
         int sn = robot.getPathRobotIdByIndex(i);
         if(sn>=ROBOT_SN_MIN)

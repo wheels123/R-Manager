@@ -66,7 +66,7 @@ inline void MyClient::processData(QString &data)
     buf.append(QString::number(itemNo,10));
     sendBack(buf);
 */
-    for(int i=0;i<itemNo;i++)
+    for(int i=0;i<list.size();i++)
     {
         QString str = list.at(i);
         int size=str.size();

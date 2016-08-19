@@ -213,3 +213,34 @@ int RobotMath::safeRobot(RobotPoint a,RobotPoint b,double &da,double &db)
       //qDebug() <<"ret 1";
     }
 }
+
+double RobotMath::estimateMinDisA2B(RobotPoint a,double la,double ra,RobotPoint b)
+{
+    const int n=25;
+    const double step=0.1;
+    double min_dis=MAX_DIS;
+    RobotPoint ea,eb;
+    ea=a;
+    eb=b;
+
+    for(int i=0;i<n;i++)
+    {
+        RobotPoint da,db;
+        computeFromEncoder(da,la,ra);
+        ea=ea+da;
+        eb=eb;
+        double x=ea.x-eb.x;
+        double y=ea.y-eb.y;
+        double dis = sqrt(x*x+y*y);
+
+        if(dis<min_dis)
+        {
+            min_dis=dis;
+        }
+    }
+    //qDebug() << "a "<<QString::number(a.x,'f',3)<<" "<<QString::number(a.y,'f',3)<<" "<<QString::number(a.phi,'f',3)<<"spd "<<QString::number(la,'f',3)<<" "<<QString::number(ra,'f',3);
+    //qDebug() << "b "<<QString::number(b.x,'f',3)<<" "<<QString::number(b.y,'f',3)<<" "<<QString::number(b.phi,'f',3)<<"spd "<<QString::number(lb,'f',3)<<" "<<QString::number(rb,'f',3);
+
+    //qDebug() << "min_dis"<<QString::number(min_dis,'f',3);
+    return min_dis;
+}

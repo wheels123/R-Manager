@@ -1062,19 +1062,15 @@ void QMainPlot::showPose(QVector<QVector<RobotPathPoint>> vvrp)
     int num=vvrp.size();
     if(num<=0)return;
 
-    Qt::GlobalColor color[30]={Qt::red,Qt::green,Qt::blue,Qt::cyan,Qt::magenta,Qt::yellow,Qt::darkRed,Qt::darkGreen,Qt::darkBlue,Qt::darkCyan,Qt::darkMagenta,Qt::darkYellow};
+    Qt::GlobalColor color[12]={Qt::red,Qt::green,Qt::blue,Qt::cyan,Qt::magenta,Qt::yellow,Qt::darkRed,Qt::darkGreen,Qt::darkBlue,Qt::darkCyan,Qt::darkMagenta,Qt::darkYellow};
 
     int poseNum=vectorCurvePose.size();
     if(poseNum<num)
     {
         for(int i=0;i<num-poseNum;i++)
         {
-            QVector<RobotPathPoint> vrp = vvrp.at(poseNum+i);
+            //QVector<RobotPathPoint> vrp = vvrp.at(poseNum+i);
             int rid=0;
-            if(vrp.size()>0)
-            {
-                rid=vrp.at(0).getRobotId();
-            }
             QString name = "P"+QString::number(rid,10);
             QwtPlotCurve *curveCus=new QwtPlotCurve(name);
             curveCus->setVisible(true);
@@ -1093,6 +1089,7 @@ void QMainPlot::showPose(QVector<QVector<RobotPathPoint>> vvrp)
 
     QPointF point;
 
+    if(vectorCurvePose.size()!=vvrp.size()) return;
     for(int i=0;i<vectorCurvePose.size();i++)
     {
         QwtPlotCurve *curveCus=vectorCurvePose.at(i);
@@ -1100,11 +1097,18 @@ void QMainPlot::showPose(QVector<QVector<RobotPathPoint>> vvrp)
 
         QVector<RobotPathPoint> vrp = vvrp.at(i);
 
-        dataCus->clear();
-        for(int i=0;i<vrp.size();i++)
+        int rid=0;
+        if(vrp.size()>0)
         {
-            point.setX(vrp.at(i).point.x);
-            point.setY(vrp.at(i).point.y);
+            rid=vrp.at(0).getRobotId();
+        }
+        QString name = "P"+QString::number(rid,10);
+        curveCus->setTitle(name);
+        dataCus->clear();
+        for(int j=0;j<vrp.size();j++)
+        {
+            point.setX(vrp.at(j).point.x);
+            point.setY(vrp.at(j).point.y);
             dataCus->append(point);
         }
 

@@ -376,7 +376,7 @@ int Robot::getPathIdByIndex(int index)
 {
     QMutexLocker locker(&mutex);
     int pathNum=path.size();
-    if(index>=pathNum) return 0;
+    if(index<0||index>=pathNum) return 0;
     RobotPath rp = path.at(index);
     return rp.id;
 }
@@ -450,7 +450,7 @@ QStringList Robot::pathToString(int index)
 {
     QStringList list;
     int pathNum=path.size();
-    if(index>=pathNum) return list;
+    if(index<0||index>=pathNum) return list;
     RobotPath rp= path.at(index);
     //int robotId=rp.robotId;
     int pointNumMax=rp.num;
@@ -479,7 +479,7 @@ QString Robot::robotStateToString(int index)
 {
     QString str;
     int pathNum=path.size();
-    if(index>=pathNum) return str;
+    if(index<0||index>=pathNum) return str;
     RobotPath rp= path.at(index);
 
     str.append(" CP ");
@@ -517,7 +517,7 @@ int Robot::getPathPointNum(int index)
 {
     QMutexLocker locker(&mutex);
     int pathNum=path.size();
-    if(index>=pathNum) return 0;
+    if(index<0||index>=pathNum) return 0;
     RobotPath rp= path.at(index);
     int pointNum=rp.point.size();
     return pointNum;
@@ -527,7 +527,7 @@ int Robot::getPathPointNumMax(int index)
 {
     QMutexLocker locker(&mutex);
     int pathNum=path.size();
-    if(index>=pathNum) return 0;
+    if(index<0||index>=pathNum) return 0;
     RobotPath rp= path.at(index);
     int pointNum=rp.num;
     return pointNum;
@@ -542,7 +542,7 @@ void Robot::clearPath(int index)
 {
     QMutexLocker locker(&mutex);
     int pathNum=path.size();
-    if(index>=pathNum) return;
+    if(index<0||index>=pathNum) return;
     RobotPath &m = path[index];
     /*
     QString s1;
@@ -687,7 +687,7 @@ RobotPath Robot::getPathByIndex(int index)
 
     qDebug( Buffer.data());
 */
-    if(index>=num) return rp;
+    if(index<0||index>=num) return rp;
     rp = path.at(index);
     return rp;
 }
@@ -700,7 +700,7 @@ double Robot::calcuMinDisWithTwoPath(int indexA,int indexB)
     QVector<RobotPoint>pa,pb;
     //int i;
     int num=path.size();
-    if(indexA>=num||indexB>=num) return -1;
+    if(indexA<0||indexA>=num||indexB<0||indexB>=num) return -1;
     //qDebug("step 4");
     RobotPath rpa= path.at(indexA);
     RobotPath rpb= path.at(indexB);
@@ -953,7 +953,10 @@ int Robot::getRobotControl(int i)
 {
     QMutexLocker locker(&mutex);
     if(i>=0&&i<robotControl.size())
-    return robotControl.at(i);
+    {
+        return robotControl.at(i);
+    }
+    return 0;
 }
 
 void Robot::setRobotControl(int i,int val)
@@ -975,7 +978,7 @@ bool Robot::calcuNearIndex(int indexA,int indexB,int &nearIndex)
     nearIndex = indexA;
     int num=path.size();
 
-    if(indexA>=num||indexB>=num) return false;
+    if(indexA<0||indexA>=num||indexB<0||indexB>=num) return false;
     //qDebug("step 4");
     RobotPath rpa= path.at(indexA);
     RobotPath rpb= path.at(indexB);
@@ -1194,7 +1197,7 @@ bool Robot::controlRun(int indexA,int indexB,int& ctrlA,int &ctrlB)
 {
     RobotPath rpa,rpb;
     int num=path.size();
-    if(indexA>=num||indexB>=num) return false;
+    if(indexA<0||indexA>=num||indexB<0||indexB>=num) return false;
 
     rpa=path.at(indexA);
     rpb=path.at(indexB);
@@ -1395,7 +1398,7 @@ bool Robot::controlRun(int indexA,int indexB,int& ctrlA,int &ctrlB)
      RobotPoint a,b;
 
 
-     if(num>=path.size()) return;
+     if(num<0||num>=path.size()) return;
 
      if(num==0)
      {
@@ -1599,7 +1602,7 @@ int Robot::getPathRobotIdById(int id)
 int Robot::getMainPathRobotIdByIndex(int index)
 {
     int pathNum=mainPath.size();
-    if(index>=pathNum) return 0;
+    if(index<0||index>=pathNum) return 0;
 
     RobotPathPoint rp= mainPath.at(index);
     return rp.getRobotId();
