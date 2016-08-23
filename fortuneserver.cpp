@@ -415,12 +415,12 @@ void FortuneServer::timerEvent( QTimerEvent *event )
     //robot.pathControl();
 
 
-    QVector<int> a=robot.getRobotControl();
+    //QVector<int> a=robot.getRobotControl();
 
     //qDebug() <<"FortuneServer timer event "<<QString::number(a.size(),10)<<QString::number(robot.getPathNum(),10);
-    if(a.size()!=robot.getPathNum()) return;
+    //if(a.size()!=robot.getPathNum()) return;
 
-    for(int i=0;i<a.size();i++)
+    for(int i=0;i<robot.getPathNum();i++)
     {
         int sn = robot.getPathRobotIdByIndex(i);
         if(sn>=ROBOT_SN_MIN)
@@ -428,7 +428,7 @@ void FortuneServer::timerEvent( QTimerEvent *event )
             QTcpSocket* skt = clientList.findSocketBySN(sn);
             if(skt!=NULL)
             {
-                sendControlCmd(skt,a.at(i));
+                sendControlCmd(skt,robot.getRobotControl(i));
             }
             int index=-1;
             bool ret = robot.findRobotId(sn,index);

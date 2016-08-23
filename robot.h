@@ -201,6 +201,7 @@ public:
     RobotType robotType;
     double leftSpeed;
     double rightSpeed;
+    int robotControl;//
 ////////////////////
     RobotPath& operator =(RobotPath a)
     {
@@ -217,6 +218,7 @@ public:
         this->robotType=a.robotType;
         this->leftSpeed=a.leftSpeed;
         this->rightSpeed=a.rightSpeed;
+        this->robotControl=a.robotControl;
     ////////////////////
         return *this;
     }
@@ -326,7 +328,7 @@ private:
     QVector<RobotPath> path;
     QVector<RobotPathPoint> mainPath;
     QMutex mutex;
-    QVector<int>robotControl;
+    //QVector<int>robotControl;
     QString robotMsg;
 
     QVector<RobotPoint> vectorPoseA;

@@ -31,11 +31,11 @@ void Manager::setRegion(QVector<EditShapeItem *> shapeItem, QCurveDataCus *path,
                 oneWayRegion.append(region);
             }
             qDebug() << "OneWayRegion setControl end\n";
-            QVector<int> ctrl = robot->getRobotControl();
-            qDebug() << "last ctrl size "<<QString::number(ctrl.size(),10);
-            for(int i=0;i<ctrl.size();i++)
+            //QVector<int> ctrl = robot->getRobotControl();
+            qDebug() << "last ctrl size "<<QString::number(robot->getPathNum(),10);
+            for(int i=0;i<robot->getPathNum();i++)
             {
-                qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(ctrl.at(i),10);
+                qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(robot->getRobotControl(i),10);
             }
         }
 
@@ -63,11 +63,11 @@ void Manager::setRegion(QVector<EditShapeItem *> shapeItem, QCurveDataCus *path,
                 twoWayRegion.append(region);
             }
             qDebug() << "TwoWayRegion setControl end\n";
-            QVector<int> ctrl = robot->getRobotControl();
-            qDebug() << "last ctrl size "<<QString::number(ctrl.size(),10);
-            for(int i=0;i<ctrl.size();i++)
+
+            qDebug() << "last ctrl size "<<QString::number(robot->getPathNum(),10);
+            for(int i=0;i<robot->getPathNum();i++)
             {
-                qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(ctrl.at(i),10);
+                qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(robot->getRobotControl(i),10);
             }
         }
 

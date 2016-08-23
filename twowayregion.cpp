@@ -481,7 +481,7 @@ void TwoWayRegion::setControl(Robot *robot)
     if(vectorRobot.size()==0) return;
 
     int ctrlMode=2;
-    QVector<int> control = robot->getRobotControl();
+    //QVector<int> control = robot->getRobotControl();
 
     if(robotIn.size()>1) ctrlMode=2;
     if(ctrlMode==2)
@@ -581,10 +581,17 @@ void TwoWayRegion::setControl(Robot *robot)
     }
 #endif
 
+    bool haveOnRegionRobot=false;
+    int indexOneRegionRobot=-1;
     qDebug() << "robotIn size "<<QString::number(robotIn.size(),10);
     for(int m=0;m<robotIn.size()-1;m++)
     {
        RobotPath rpm = robotIn.at(m);
+       if(rpm.id!=1)
+       {
+           haveOnRegionRobot=true;
+           indexOneRegionRobot=m;
+       }
        qDebug() << "robotIn i "<<QString::number(m,10)<<"id "<<QString::number(rpm.robotId,10);
     }
     for(int m=0;m<robotIn.size()-1;m++)
@@ -627,17 +634,19 @@ void TwoWayRegion::setControl(Robot *robot)
                 int indexM=-1;
                 robot->findPathIndexById(rpm.robotId,0,indexM);
 
-                if(indexM!=-1&&indexM<control.size())
+                if(indexM!=-1)
                 {
-                   curCtrlStateM=control.at(indexM);
+                   //curCtrlStateM=control.at(indexM);
+                   curCtrlStateM=robot->getRobotControl(indexM);
                 }
 
                 int indexN=-1;
                 robot->findPathIndexById(rpn.robotId,0,indexN);
 
-                if(indexN!=-1&&indexN<control.size())
+                if(indexN!=-1)
                 {
-                    curCtrlStateN=control.at(indexN);
+                    //curCtrlStateN=control.at(indexN);
+                    curCtrlStateN=robot->getRobotControl(indexN);
                 }
 
                 qDebug()<<"safeRobot"<<QString::number(ret,10)<<"movableM"<<QString::number(movableM,10)<<"movableN"<<QString::number(movableN,10);
@@ -687,7 +696,7 @@ void TwoWayRegion::setControl(Robot *robot)
                     if(needCtrl)
                     {
                         index = robot->findPathIndexById(robotId);
-                        if(index!=-1&&index<control.size())
+                        if(index!=-1)
                         {
                            robot->setRobotControl(index,0);
                            qDebug() << "stop unsafe robot id "<<QString::number(robotId,10);
@@ -703,20 +712,36 @@ void TwoWayRegion::setControl(Robot *robot)
         }
     }
 
-    for(int i=0;i<control.size();i++)
+    for(int i=0;i<robot->getPathNum();i++)
     {
-        if(control.at(i)==0)
+        if(robot->getRobotControl(i)==0)
         {
             qDebug() << "mast stop i "<<QString::number(i,10)<<" id "<<QString::number(robot->getPathRobotIdByIndex(i),10);
             robot->setRobotControl(i,0);
         }
     }
-
-    QVector<int> ctrl = robot->getRobotControl();
-    qDebug() << "ctrl size "<<QString::number(ctrl.size(),10);
-    for(int i=0;i<ctrl.size();i++)
+    //haveOnReginRobot
+    bool allStop=false;
+    qDebug() << "ctrl size "<<QString::number(robot->getPathNum(),10);
+    for(int i=0;i<robot->getPathNum();i++)
     {
-        qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(ctrl.at(i),10);
+        if(robot->getRobotControl(i)!=0)
+        {
+            allStop=true;
+        }
+        qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(robot->getRobotControl(i),10);
+    }
+
+    if(haveOnRegionRobot && allStop && indexOneRegionRobot<robotIn.size() && indexOneRegionRobot>=0)
+    {
+        int robotId = robotIn.at(indexOneRegionRobot).robotId;
+
+        int index = robot->findPathIndexById(robotId);
+        if(index!=-1)
+        {
+           robot->setRobotControl(index,1);
+           qDebug() << "run one region id"<<QString::number(robotId,10);
+        }
     }
 
 }

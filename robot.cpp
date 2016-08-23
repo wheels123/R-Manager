@@ -155,6 +155,8 @@ int Robot::insertPathPoint(int robotId,int pathId,int mainPathId,int maxPointNum
     tempPath.curPose.x=0;
     tempPath.curPose.y=0;
     tempPath.curPose.phi=0;
+    tempPath.leftSpeed=0;
+    tempPath.rightSpeed=0;
     ret_find=findPathIndexById(robotId,pathId,index);
 
     if(ret_find==-1)
@@ -204,7 +206,8 @@ int Robot::insertRobotState(int robotId,RobotPoint point,double left,double righ
     tempPath.id=-1;
     tempPath.num=0;
     tempPath.robotId=robotId;
-
+    tempPath.pathIdToGo=0;
+    tempPath.robotControl=1;//only set first time
     bool ret_find=findRobotId(robotId,index);
     if(ret_find==false)
     {
@@ -499,10 +502,7 @@ QString Robot::robotStateToString(int index)
     str.append(" RT ");
     str.append(QString::number((int)(rp.robotType),10));
     str.append(" CT ");
-    if(index<robotControl.size())
-    {
-        str.append(QString::number((int)(robotControl.at(index)),10));
-    }
+    str.append(QString::number((int)(rp.robotControl),10));
     return str;
 }
 
@@ -776,20 +776,26 @@ double Robot::calcuMinDisWithTwoPath(int indexA,int indexB)
 
 void Robot::resetControlValue()
 {
+    /*
     for(int i=0;i<robotControl.size();i++)
     {
         robotControl[i]=1;
+    }*/
+    for(int i=0;i<path.size();i++)
+    {
+        path[i].robotControl=1;
     }
 }
 
 void Robot::updateControlNum()
 {
-    int num=path.size();
-    robotControl.resize(num);
+    //int num=path.size();
+    //robotControl.resize(num);
 }
 
 void Robot::pathControl()
 {
+    /*
     int num=path.size();
 
     robotControl.resize(num);
@@ -892,6 +898,7 @@ void Robot::pathControl()
             }
         }
     }
+    */
 }
 
 double Robot::estimateMinDis(RobotPoint a,RobotPoint b)
@@ -946,15 +953,21 @@ double Robot::estimateMinDis(RobotPoint a,RobotPoint b)
 QVector<int>& Robot::getRobotControl()
 {
     QMutexLocker locker(&mutex);
-    return robotControl;
+    //return robotControl;
 }
 
 int Robot::getRobotControl(int i)
 {
     QMutexLocker locker(&mutex);
+    /*
     if(i>=0&&i<robotControl.size())
     {
         return robotControl.at(i);
+    }
+    */
+    if(i>=0&&i<path.size())
+    {
+        return path.at(i).robotControl;
     }
     return 0;
 }
@@ -962,8 +975,10 @@ int Robot::getRobotControl(int i)
 void Robot::setRobotControl(int i,int val)
 {
     QMutexLocker locker(&mutex);
-    if(i>=0&&i<robotControl.size())
-    robotControl[i]=val;
+    if(i>=0&&i<path.size())
+    {
+        path[i].robotControl=val;
+    }
 }
 
 bool Robot::calcuNearIndex(int indexA,int indexB,int &nearIndex)

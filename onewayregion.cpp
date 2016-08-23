@@ -140,7 +140,6 @@ void OneWayRegion::setControl(Robot *robot)
     int robotNum=vectorRobot.at(0).size();
     if(robotNum==0) return;
 
-    QVector<int> control = robot->getRobotControl();
     QVector<int> controlRegion;
     QVector<RobotPath> rp=vectorRobot.at(0);
     QVector<RobotPath> rp_no_edit=vectorRobot.at(0);
@@ -249,9 +248,8 @@ void OneWayRegion::setControl(Robot *robot)
         {
             newRobotNum++;
             rp.erase(rp.begin()+i);
-            if(index!=-1&&index<control.size())
+            if(index!=-1)
             {
-
                robot->setRobotControl(index,0);
                qDebug() << "stop new id "<<QString::number(robotId,10);
             }
@@ -275,7 +273,7 @@ void OneWayRegion::setControl(Robot *robot)
         int index=-1;
         robot->findPathIndexById(activeRobot.at(0).robotId,0,index);
 
-        if(index!=-1&&index<control.size())
+        if(index!=-1)
         {
 
            robot->setRobotControl(index,1);
@@ -299,7 +297,7 @@ void OneWayRegion::setControl(Robot *robot)
             int index=-1;
             robot->findPathIndexById(activeRobot.at(0).robotId,0,index);
 
-            if(index!=-1&&index<control.size())
+            if(index!=-1)
             {
 
                robot->setRobotControl(index,1);
@@ -321,9 +319,9 @@ void OneWayRegion::setControl(Robot *robot)
 
 //stop stoped by other region
 //qDebug() <<"stop stoped by other region";
-    for(int i=0;i<control.size();i++)
+    for(int i=0;i<robot->getPathNum();i++)
     {
-        if(control.at(i)==0)
+        if(robot->getRobotControl(i)==0)
         {
             qDebug() << "mast stop i "<<QString::number(i,10)<<" id "<<QString::number(robot->getPathRobotIdByIndex(i),10);
             robot->setRobotControl(i,0);
@@ -340,11 +338,11 @@ void OneWayRegion::setControl(Robot *robot)
     }
 
 
-    QVector<int> ctrl = robot->getRobotControl();
-    qDebug() << "ctrl size "<<QString::number(ctrl.size(),10);
-    for(int i=0;i<ctrl.size();i++)
+    //QVector<int> ctrl = robot->getRobotControl();
+    qDebug() << "ctrl size "<<QString::number(robot->getPathNum(),10);
+    for(int i=0;i<robot->getPathNum();i++)
     {
-        qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(ctrl.at(i),10);
+        qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(robot->getRobotControl(i),10);
     }
 
 }
