@@ -481,7 +481,7 @@ void TwoWayRegion::setControl(Robot *robot)
     if(vectorRobot.size()==0) return;
 
     int ctrlMode=2;
-    //QVector<int> control = robot->getRobotControl();
+    QVector<int> control = robot->getRobotControl();
 
     if(robotIn.size()>1) ctrlMode=2;
     if(ctrlMode==2)
@@ -712,22 +712,22 @@ void TwoWayRegion::setControl(Robot *robot)
         }
     }
 
-    for(int i=0;i<robot->getPathNum();i++)
+    for(int i=0;i<control.size();i++)
     {
-        if(robot->getRobotControl(i)==0)
+        if(control.at(i)==0)
         {
             qDebug() << "mast stop i "<<QString::number(i,10)<<" id "<<QString::number(robot->getPathRobotIdByIndex(i),10);
             robot->setRobotControl(i,0);
         }
     }
     //haveOnReginRobot
-    bool allStop=false;
+    bool allStop=true;
     qDebug() << "ctrl size "<<QString::number(robot->getPathNum(),10);
     for(int i=0;i<robot->getPathNum();i++)
     {
         if(robot->getRobotControl(i)!=0)
         {
-            allStop=true;
+            allStop=false;
         }
         qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(robot->getRobotControl(i),10);
     }

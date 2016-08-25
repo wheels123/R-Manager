@@ -2,7 +2,7 @@
 #define EDITSHAPEITEM_H
 
 #include <qwt_plot_shapeitem.h>
-
+#include <robot.h>
 class EditShapeItem : public QwtPlotShapeItem
 {
 public:
@@ -26,6 +26,10 @@ public:
     void setClose(bool closed);
     void setAlpha(int a);
     bool pointInPolygon(QPointF point);
+    bool segmentsIntr(RobotPoint a, RobotPoint b, RobotPoint c, RobotPoint d,RobotPoint &out);
+    bool pointToPolygonDis(RobotPoint pose,double &dis);
+    double determinant(double v1, double v2, double v3, double v4);
+    bool intersect(RobotPoint aa, RobotPoint bb, RobotPoint cc, RobotPoint dd);
 private:
     QPolygonF pointList;
     bool m_closed;

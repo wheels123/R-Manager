@@ -15,6 +15,8 @@ private:
     QVector<QVector<QwtPointCus>> vectorPath;
     QVector<QVector<RobotPath>> vectorRobot;
     QVector<RobotPath> activeRobot;
+    QVector<RobotPath> activeRobotLast;
+    int loopTimes;
     RobotMath m_math;
 
 public:

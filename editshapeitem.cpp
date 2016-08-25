@@ -130,3 +130,100 @@ bool EditShapeItem::pointInPolygon(QPointF point)
 
   return oddNodes;
 }
+
+
+bool EditShapeItem::segmentsIntr(RobotPoint a, RobotPoint b, RobotPoint c, RobotPoint d,RobotPoint &out){
+
+    // 三角形abc 面积的2倍
+    double area_abc = (a.x - c.x) * (b.y - c.y) - (a.y - c.y) * (b.x - c.x);
+
+    // 三角形abd 面积的2倍
+    double area_abd = (a.x - d.x) * (b.y - d.y) - (a.y - d.y) * (b.x - d.x);
+
+    // 面积符号相同则两点在线段同侧,不相交 (对点在线段上的情况,本例当作不相交处理);
+    if ( area_abc*area_abd>=0 ) {
+        return false;
+    }
+
+    // 三角形cda 面积的2倍
+    double area_cda = (c.x - a.x) * (d.y - a.y) - (c.y - a.y) * (d.x - a.x);
+    // 三角形cdb 面积的2倍
+    // 注意: 这里有一个小优化.不需要再用公式计算面积,而是通过已知的三个面积加减得出.
+    double area_cdb = area_cda + area_abc - area_abd ;
+    if (  area_cda * area_cdb >= 0 ) {
+        return false;
+    }
+
+    //计算交点坐标
+    double t = area_cda / ( area_abd- area_abc );
+    double dx= t*(b.x - a.x);
+    double dy= t*(b.y - a.y);
+
+    out.x=a.x + dx;
+    out.y=a.y + dy;
+    return true;
+}
+
+bool EditShapeItem::pointToPolygonDis(RobotPoint pose,double &dis)
+{
+  QPolygonF& polygon =pointList;
+  RobotPoint aa,bb,cc,dd,off;
+
+  off.x=100;
+  off.y=0;
+  off.phi=0;
+  aa=pose;
+  bb=aa+off;
+
+
+
+  for(int i=0;i<polygon.size()-1;i++)
+  {
+      cc.x=polygon.at(i).x();
+      cc.y=polygon.at(i).y();
+      dd.x=polygon.at(i+1).x();
+      dd.y=polygon.at(i+1).y();
+      bool ret = intersect(aa,bb,cc,dd);
+      if(ret==true)
+      {
+          RobotPoint out;
+          bool ret = segmentsIntr(aa,bb,cc,dd,out);
+          if(ret)
+          {
+              double x=aa.x-out.x;
+              double y=aa.y-out.y;
+              dis=sqrt(x*x+y*y);
+              return true;
+          }
+          break;
+      }
+  }
+  return false;
+}
+
+
+///------------alg 3------------
+double EditShapeItem::determinant(double v1, double v2, double v3, double v4)  // 行列式
+{
+    return (v1*v3-v2*v4);
+}
+
+bool EditShapeItem::intersect(RobotPoint aa, RobotPoint bb, RobotPoint cc, RobotPoint dd)
+{
+    double delta = determinant(bb.x-aa.x, cc.x-dd.x, bb.y-aa.y, cc.y-dd.y);
+    if ( delta<=(1e-6) && delta>=-(1e-6) )  // delta=0，表示两线段重合或平行
+    {
+        return false;
+    }
+    double namenda = determinant(cc.x-aa.x, cc.x-dd.x, cc.y-aa.y, cc.y-dd.y) / delta;
+    if ( namenda>1 || namenda<0 )
+    {
+        return false;
+    }
+    double miu = determinant(bb.x-aa.x, cc.x-aa.x, bb.y-aa.y, cc.y-aa.y) / delta;
+    if ( miu>1 || miu<0 )
+    {
+        return false;
+    }
+    return true;
+}

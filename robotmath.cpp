@@ -223,6 +223,16 @@ double RobotMath::estimateMinDisA2B(RobotPoint a,double la,double ra,RobotPoint 
     ea=a;
     eb=b;
 
+    if(fabs(la)+fabs(ra)<0.01)
+    {
+        la=50;
+        ra=50;
+    }
+    else if(la<-0.1 && ra<-0.1)
+    {
+        la=20;
+        ra=20;
+    }
     for(int i=0;i<n;i++)
     {
         RobotPoint da,db;

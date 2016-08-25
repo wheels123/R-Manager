@@ -328,7 +328,7 @@ private:
     QVector<RobotPath> path;
     QVector<RobotPathPoint> mainPath;
     QMutex mutex;
-    //QVector<int>robotControl;
+    QVector<int>robotControl;
     QString robotMsg;
 
     QVector<RobotPoint> vectorPoseA;

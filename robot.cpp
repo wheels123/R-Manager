@@ -953,7 +953,13 @@ double Robot::estimateMinDis(RobotPoint a,RobotPoint b)
 QVector<int>& Robot::getRobotControl()
 {
     QMutexLocker locker(&mutex);
-    //return robotControl;
+
+    QVector<int>().swap(robotControl);
+    for(int i=0;i<path.size();i++)
+    {
+       robotControl.append(path.at(i).robotControl);
+    }
+    return robotControl;
 }
 
 int Robot::getRobotControl(int i)
