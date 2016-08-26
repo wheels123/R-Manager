@@ -112,7 +112,9 @@ void OneWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
     for(int m=0;m<robotIn.size();m++)
     {
        RobotPath rpm = robotIn.at(m);
-       qDebug() << "robotIn i "<<QString::number(m,10)<<"id "<<QString::number(rpm.robotId,10);
+       double disM=100;
+       bool retM= shapeItem->pointToPolygonDis(rpm.curPose,disM);
+       qDebug() << "robotIn i "<<QString::number(m,10)<<"id "<<QString::number(rpm.robotId,10)<<"dis to poly"<<QString::number(disM,'f',3);
     }
 
     /*
@@ -140,7 +142,7 @@ void OneWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
         }
     }
 
-    qDebug() << "OneWay setRegion end\n";
+    qDebug() << "OneWay setRegion end";
 }
 
 void OneWayRegion::setControl(Robot *robot)
@@ -358,12 +360,33 @@ void OneWayRegion::setControl(Robot *robot)
                            {
                                 QVector<RobotPath>().swap(activeRobot);
                                 activeRobot.append(robotInAbs.at(0));
+                                qDebug() <<"activeRobot changed to id "<<QString::number(robotInAbs.at(0).robotId,10);
                            }
                        }
                    }
-                   else
+                   else if(robotInAbs.size()> 1)
                    {
-                       qDebug() <<"never reach robotInAbs "<<QString::number(robotInAbs.size(),10);
+                       qDebug() <<"too many robotInAbs "<<QString::number(robotInAbs.size(),10);
+                       QVector<RobotPath>().swap(activeRobot);
+
+                       RobotPath p = findSafeRobot(robotInAbs,robot);
+
+                       activeRobot.append(p);
+
+                       int index=-1;
+                       robot->findPathIndexById(activeRobot.at(0).robotId,0,index);
+
+                       if(index!=-1)
+                       {
+
+                          robot->setRobotControl(index,1);
+                          qDebug() << "run first safe robot id "<<QString::number(activeRobot.at(0).robotId,10);
+                       }
+                       else
+                       {
+                           qDebug() <<"robot id not exist";
+                       }
+                       //qDebug() <<"never reach robotInAbs "<<QString::number(robotInAbs.size(),10);
                    }
                }
             }
@@ -674,10 +697,13 @@ RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp,Robot *robot)
     QVector<bool> movable;
     QVector<double> distSort;
     QVector<RobotPath> robotSort;
+    qDebug() << "findSafeRobot start";
+    rp.robotId=0;
+    if(vrp.size()==0) return rp;
     if(vrp.size()==1) {
         return vrp.at(0);
     }
-    qDebug() << "findSafeRobot 1";
+
     rp=vrp.at(0);
     movable.resize(vrp.size());
     distSort.resize(vrp.size());
@@ -713,7 +739,7 @@ RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp,Robot *robot)
         }
         distSort[i]=min_dis;
     }
-    qDebug() << "findSafeRobot 2";
+    //qDebug() << "findSafeRobot 2";
     for(int i=0;i<robotSort.size()-1;i++)
     {
         for(int j=i+1;j<robotSort.size();j++)
@@ -742,13 +768,13 @@ RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp,Robot *robot)
         qDebug() << "robotSort i "<<QString::number(i,10)<< "id "<<QString::number(t_rp.robotId,10)<< "dis "<<QString::number(t_dis,'f',3);
     }
 
-    qDebug() << "findSafeRobot 3";
+    //qDebug() << "findSafeRobot 3";
     for(int i=0;i<movable.size();i++)
     {
         bool movableM = robot->checkMovableById(robotSort.at(i).robotId);
         movable[i] = movableM;
     }
-    qDebug() << "findSafeRobot 4";
+    //qDebug() << "findSafeRobot 4";
     //sorted dis and robot
     bool findMovableAndIn=false;
     bool findIn=false;
@@ -763,7 +789,7 @@ RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp,Robot *robot)
             break;
         }
     }
-    qDebug() << "findSafeRobot 5";
+    //qDebug() << "findSafeRobot 5";
     if(findMovableAndIn==false)
     {
         qDebug() << "findSafeRobot findMovableAndIn false";
@@ -796,7 +822,7 @@ RobotPath OneWayRegion::findSafeRobot(QVector<RobotPath> vrp,Robot *robot)
             }
         }
     }
-    qDebug() << "findSafeRobot 6";
+    qDebug() << "findSafeRobot end";
     return rp;
 }
 

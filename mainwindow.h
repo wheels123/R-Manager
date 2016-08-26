@@ -20,6 +20,7 @@
 #include "QComboBox"
 #include "twowayregion.h"
 #include "control.h"
+#include "editshapeitem.h"
 class QwtPointCus;
 class QCurveDataCus;
 class DialogOutputOption;

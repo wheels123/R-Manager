@@ -15,7 +15,7 @@ void Manager::setRegion(QVector<EditShapeItem *> shapeItem, QCurveDataCus *path,
 
         if(item->type()==EditShapeItem::OneWay)
         {
-            qDebug() << "shapeItem i "<<QString::number(i,10)<<"id "<<QString::number(item->id(),10);
+            qDebug() << "--------------------shapeItem i "<<QString::number(i,10)<<"id "<<QString::number(item->id(),10);
             bool ok;
             OneWayRegion *region= findOneWayRegion(item,ok);
             if(ok==true)
@@ -30,13 +30,14 @@ void Manager::setRegion(QVector<EditShapeItem *> shapeItem, QCurveDataCus *path,
                 region->setControl(robot);
                 oneWayRegion.append(region);
             }
-            qDebug() << "OneWayRegion setControl end\n";
+
             //QVector<int> ctrl = robot->getRobotControl();
             qDebug() << "last ctrl size "<<QString::number(robot->getPathNum(),10);
             for(int i=0;i<robot->getPathNum();i++)
             {
                 qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(robot->getRobotControl(i),10);
             }
+            qDebug() << "OneWayRegion setControl end\n";
         }
 
     }
@@ -47,7 +48,7 @@ void Manager::setRegion(QVector<EditShapeItem *> shapeItem, QCurveDataCus *path,
 
         if(item->type()==EditShapeItem::TwoWay)
         {
-            qDebug() << "shapeItem i "<<QString::number(i,10)<<"id "<<QString::number(item->id(),10);
+            qDebug() << "--------------------shapeItem i "<<QString::number(i,10)<<"id "<<QString::number(item->id(),10);
             bool ok;
             TwoWayRegion *region= findTwoWayRegion(item,ok);
             if(ok==true)
@@ -62,13 +63,15 @@ void Manager::setRegion(QVector<EditShapeItem *> shapeItem, QCurveDataCus *path,
                 region->setControl(robot);
                 twoWayRegion.append(region);
             }
-            qDebug() << "TwoWayRegion setControl end\n";
+
 
             qDebug() << "last ctrl size "<<QString::number(robot->getPathNum(),10);
             for(int i=0;i<robot->getPathNum();i++)
             {
                 qDebug() << "ctrl i "<<QString::number(i,10)<<" val "<<QString::number(robot->getRobotControl(i),10);
             }
+
+            qDebug() << "TwoWayRegion setControl end\n";
         }
 
     }

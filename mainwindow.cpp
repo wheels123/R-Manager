@@ -12,6 +12,23 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+
+    //
+/*
+    EditShapeItem shapeItem;
+    QPointF a(0,0),b(10,0),c(10,10),d(0,10);
+
+    shapeItem.insertPoint(a);
+    shapeItem.insertPoint(b);
+    shapeItem.insertPoint(c);
+    shapeItem.insertPoint(d);
+
+    double dis1,dis2,dis3;
+    bool ret1 = shapeItem.pointToPolygonDis(RobotPoint(5,5,0),dis1);
+    bool ret2 = shapeItem.pointToPolygonDis(RobotPoint(5,15,0),dis2);
+    bool ret3 = shapeItem.pointToPolygonDis(RobotPoint(15,15,0),dis3);
+    */
+    //
     dlgOutputOption=NULL;
     dlgServer=NULL;
     server=NULL;

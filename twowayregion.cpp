@@ -297,7 +297,7 @@ void TwoWayRegion::setRegion(EditShapeItem *region, QCurveDataCus *path,Robot *r
             qDebug() << "robot id "<<QString::number(p.robotId,10)<<" "<<QString::number(p.curPose.x,'f',3)<<" "<<QString::number(p.curPose.y,'f',3);
         }
     }
-    qDebug() << "setRegion end\n";
+    qDebug() << "setRegion end";
 }
 bool TwoWayRegion::findNet(RobotPathPoint p,int net)
 {

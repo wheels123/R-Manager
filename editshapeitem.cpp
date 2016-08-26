@@ -183,8 +183,8 @@ bool EditShapeItem::pointToPolygonDis(RobotPoint pose,double &dis)
       cc.y=polygon.at(i).y();
       dd.x=polygon.at(i+1).x();
       dd.y=polygon.at(i+1).y();
-      bool ret = intersect(aa,bb,cc,dd);
-      if(ret==true)
+      //bool ret = intersect(aa,bb,cc,dd);
+      //if(ret==true)
       {
           RobotPoint out;
           bool ret = segmentsIntr(aa,bb,cc,dd,out);
@@ -194,8 +194,7 @@ bool EditShapeItem::pointToPolygonDis(RobotPoint pose,double &dis)
               double y=aa.y-out.y;
               dis=sqrt(x*x+y*y);
               return true;
-          }
-          break;
+          } 
       }
   }
   return false;
