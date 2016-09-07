@@ -98,6 +98,20 @@ void FortuneServer::incomingConnection(qintptr socketDescriptor)
 */
     MyClient *client = new MyClient(this);
     client->SetSocket(socketDescriptor);
+    //刪除ip相同 但是端口不同的客戶端 說明客戶端断开重连
+    for(int i=0;i<clientList.getClientVecSize();)
+    {
+        QTcpSocket *skt = clientList.getClientVecByIndex(i);
+        if(skt->peerAddress().toString()==client->getSocket()->peerAddress().toString())
+        {
+            clientList.deleteClient(i);
+        }
+        else
+        {
+            i++;
+        }
+    }
+
     clientList.inseartClient(client->getSocket());
 
 

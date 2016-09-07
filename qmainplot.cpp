@@ -28,10 +28,10 @@ QMainPlot::QMainPlot(QWidget *parent):
     //
     initPlotGrid();
 
-    const double xMin = -170.0;
-    const double xMax = 170.0;
-    const double yMin = -100.0;
-    const double yMax = 100.0;
+    const double xMin = -50.0;
+    const double xMax = 50.0;
+    const double yMin = -50.0;
+    const double yMax = 50.0;
     pointNum=0;
     setAxisScale(xBottom, xMin, xMax);
     setAxisScale(yLeft, yMin, yMax);
@@ -1089,28 +1089,38 @@ void QMainPlot::showPose(QVector<QVector<RobotPathPoint>> vvrp)
 
     QPointF point;
 
-    if(vectorCurvePose.size()!=vvrp.size()) return;
+    //if(vectorCurvePose.size()!=vvrp.size()) return;
     for(int i=0;i<vectorCurvePose.size();i++)
     {
         QwtPlotCurve *curveCus=vectorCurvePose.at(i);
         QCurveData *dataCus = static_cast<QCurveData *>(curveCus->data());
 
-        QVector<RobotPathPoint> vrp = vvrp.at(i);
+        if(i<vvrp.size())
+        {
+            QVector<RobotPathPoint> vrp = vvrp.at(i);
 
-        int rid=0;
-        if(vrp.size()>0)
-        {
-            rid=vrp.at(0).getRobotId();
+            int rid=0;
+            if(vrp.size()>0)
+            {
+                rid=vrp.at(0).getRobotId();
+            }
+            QString name = "P"+QString::number(rid,10);
+            curveCus->setTitle(name);
+            dataCus->clear();
+            for(int j=0;j<vrp.size();j++)
+            {
+                point.setX(vrp.at(j).point.x);
+                point.setY(vrp.at(j).point.y);
+                dataCus->append(point);
+            }
         }
-        QString name = "P"+QString::number(rid,10);
-        curveCus->setTitle(name);
-        dataCus->clear();
-        for(int j=0;j<vrp.size();j++)
+        else
         {
-            point.setX(vrp.at(j).point.x);
-            point.setY(vrp.at(j).point.y);
-            dataCus->append(point);
+            QString name = "Px";
+            curveCus->setTitle(name);
+            dataCus->clear();
         }
+
 
         if (!curveCus->isVisible()) {
             curveCus->setVisible(true);
