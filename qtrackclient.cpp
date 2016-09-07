@@ -903,7 +903,7 @@ bool QTrackClient::saveToTxtFile(QCurveDataCus *dest,QCurveDataCus *label,QCurve
             validNum++;
         }
     }
-
+/* 未排序
     for( int i=0;i<PointNum;i++)
     {
         type = (int)data->sample(i).type();
@@ -919,6 +919,35 @@ bool QTrackClient::saveToTxtFile(QCurveDataCus *dest,QCurveDataCus *label,QCurve
         dataWrite=str.toLatin1();
         in<<dataWrite;
         index++;
+    }
+*/
+
+    /*排序*/
+    for( int j=1;j<=maxId;j++)
+    {
+        for( int i=0;i<PointNum;i++)
+        {
+
+            id = (int)data->sample(i).id();
+
+            if(id==j)
+            {
+                type = (int)data->sample(i).type();
+                x = (int)(data->sample(i).x()*100);
+                y = (int)(data->sample(i).y()*100);
+                phi = (int)(data->sample(i).phi()*1000);
+                id = (int)data->sample(i).id();
+
+                if(!validId(id)) continue;
+                QByteArray dataWrite;
+                QString str;
+                str.sprintf("L%d,%d,%d,%.3f,%.3f,%.3f\n",validNum,index,id,data->sample(i).x(),data->sample(i).y(),data->sample(i).phi());
+                dataWrite=str.toLatin1();
+                in<<dataWrite;
+                index++;
+
+            }
+        }
     }
 
  /////////////////////////////////////////////

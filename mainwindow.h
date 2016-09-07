@@ -130,6 +130,7 @@ private:
     inline void onPushButtonSavePathTxtClicked();
     inline void onPushButtonAddShapeItemClicked();
     inline void onPushButtonDeleteShapeItemClicked();
+
 //QObject::connect: No such slot MainWindow::onShapeItemTypeChanged(int) in mainwindow.cpp:283
     void loadInitServerFile();
     // Socket events
@@ -148,6 +149,7 @@ private:
     void onNewRobotMsg(QString str);
     void onNewPointServer(const QwtPointCus point);
     void timerEvent( QTimerEvent *event );
+    void onPushButtonLoadClicked_hand();
 private slots:
     void onShapeItemTypeChanged(int index);
 

@@ -351,6 +351,7 @@ public:
     void sendControlCmd(QTcpSocket* socket,int cmd);
     QVector<RobotPoint> getPose(int n);
     QVector<QVector<RobotPathPoint>> getPose();
+        void sendUpdateLabel();
 signals:
     void newConnection(ClientSocketList* list, const QTcpSocket *socket,ClientSocketList::clientStatus status);
     void updataRobotPathServer(Robot* robot);
@@ -369,6 +370,7 @@ protected:
     void timerEvent( QTimerEvent *event );
     void robotMsg(QString str);
     void onNewPoint(const QwtPointCus point);
+
 private:
     QStringList fortunes;
     ClientSocketList clientList;

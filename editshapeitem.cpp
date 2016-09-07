@@ -32,7 +32,7 @@ QPolygonF EditShapeItem::getPolygon()
 void EditShapeItem::init(QwtPlot *plot ,QColor color,int id,ShapeType type)
 {
     QColor fillColor = color;
-    fillColor.setAlpha( 100 );
+    fillColor.setAlpha( 25 );
     QPen pen( color, 3 );
     pen.setJoinStyle( Qt::MiterJoin );
     this->setPen( pen );

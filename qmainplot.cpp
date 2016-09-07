@@ -200,7 +200,7 @@ inline void QMainPlot::initPlotCurves(void)
     CurveNormal->attach(this);
 //////
     CurveDest = new QwtPlotCurveCus("Dest");
-    CurveDest->setVisible(false);
+    CurveDest->setVisible(true);
     CurveDest->setData(new QCurveDataCus());
     CurveDest->setStyle(QwtPlotCurveCus::NoCurve);
     CurveDest->setSymbol(new QwtSymbol(QwtSymbol::Star1,
@@ -220,7 +220,7 @@ inline void QMainPlot::initPlotCurves(void)
     CurveLabel->attach(this);
 //////
     CurvePath = new QwtPlotCurveCus("Path");
-    CurvePath->setVisible(false);
+    CurvePath->setVisible(true);
     CurvePath->setData(new QCurveDataCus());
     CurvePath->setStyle(QwtPlotCurveCus::NetWorkLines);
     CurvePath->setSymbol(new QwtSymbol(QwtSymbol::RTriangle,
@@ -1483,7 +1483,7 @@ inline bool QMainPlot::parseJsonFile(QJsonDocument &json)
                 plotItemEnd();
             }
             addShapeItem(id,type);
-            shapeItem->setVisible(false);
+            shapeItem->setVisible(true);
             last_id=id;
         }
 
@@ -1525,12 +1525,12 @@ void QMainPlot::highLightShapeItem(QPointF p)
         if(shapeItemList.at(i)->pointInPolygon(point))
         {
              //qDebug() << "id "<<QString::number(shapeItemList.at(i)->id(),10)<<" IN";
-             shapeItemList.at(i)->setAlpha(200);
+             shapeItemList.at(i)->setAlpha(50);
         }
         else
         {
              //qDebug() << "id "<<QString::number(shapeItemList.at(i)->id(),10)<<" OUT";
-             shapeItemList.at(i)->setAlpha(100);
+             shapeItemList.at(i)->setAlpha(25);
         }
     }
     QwtPlotCanvas *plotCanvas =

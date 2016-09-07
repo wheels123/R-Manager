@@ -193,11 +193,13 @@ void FortuneServer::onUpdateClientStatus(QTcpSocket* socket,int state)
     if(state==2)
     {
         clientList.deleteClient(socket);
+        /*
         int ret = deletePathWithClientList();
         if(ret>0)
         {
              emit updataRobotPathServer(&robot);
         }
+        */
     }
     for(int i=0;i<clientList.getClientVecSize();)
     {
@@ -459,6 +461,24 @@ void FortuneServer::timerEvent( QTimerEvent *event )
         }
     }
 #endif
+}
+
+
+void FortuneServer::sendUpdateLabel()
+{
+    for(int i=0;i<clientList.getClientVecSize();i++)
+    {
+        QTcpSocket *skt = clientList.getClientVecByIndex(i);
+        if(skt==NULL) continue;
+
+        QByteArray dataWrite;
+        QString str;
+        if(skt->isWritable()==false) return;
+        str.sprintf("$UDL%5d\n",0);
+        dataWrite=str.toLatin1();
+        skt->write(dataWrite,dataWrite.size());
+
+    }
 }
 
 void FortuneServer::sendSNOK(QTcpSocket* socket,int sn)

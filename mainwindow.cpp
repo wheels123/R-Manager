@@ -505,7 +505,7 @@ inline void MainWindow::initTrackClient()
 
 inline void MainWindow::initTrackServer()
 {
-    const QString ipAddrHead="192.168.0.";
+    const QString ipAddrHead="192.168.31.";
 
     server = new FortuneServer(this);
 
@@ -727,6 +727,81 @@ void MainWindow::onPushButtonSavePathTxtClicked()
 
 
     labelStatus->setText(message);
+}
+
+
+void MainWindow::onPushButtonLoadClicked_hand()
+{
+    QString fileName;
+    QString fileNameNormal;
+    fileName = "ypy.json";
+    if(fileName.isEmpty()) {
+        return;
+    }
+    QStringList strlist=fileName.split(".");
+    fileNameNormal = strlist.at(0)+"_normal.json";
+    QString message;
+    bool result = trackClient->LoadJsonFile(fileName);
+    if (result) {
+        message = "Status : " + fileName + " loaded";
+        QCurveDataCus *datLabel = trackClient->getLabelData();
+        QCurveDataCus *dataDest = trackClient->getDestData();
+        QCurveDataCus *dataPath = trackClient->getPathData();
+        if(datLabel!=NULL)
+        {
+            mainPlotLive->loadData(datLabel,QwtPointCus::Label);
+        }
+        else
+        {
+            message = "Status : failed to load Label " + fileName;
+        }
+
+        if(dataDest!=NULL)
+        {
+            mainPlotLive->loadData(dataDest,QwtPointCus::Dest);
+        }
+        else
+        {
+            message = "Status : failed to load Dest " + fileName;
+        }
+
+        if(dataDest!=NULL)
+        {
+            mainPlotLive->loadData(dataPath,QwtPointCus::PathPoint);
+        }
+        else
+        {
+            message = "Status : failed to load Path " + fileName;
+        }
+
+    } else {
+        message = "Status : failed to load " + fileName;
+    }
+
+    labelStatus->setText(message);
+
+    message+="  ";
+    result = trackClient->LoadJsonFileNormal(fileNameNormal);
+    if (result) {
+        message += "Status : " + fileNameNormal + " loaded";
+        QCurveDataCus *data = trackClient->getNormalData();
+        if(data!=NULL)
+        {
+            mainPlotLive->loadData(data,QwtPointCus::Normal);
+            //mainPlotLive->loadData_t(data);
+
+        }
+        else
+        {
+            //message = "Status : failed to load normal " + fileNameNormal;
+        }
+    } else {
+        message += "Status : failed to load " + fileNameNormal;
+    }
+
+    labelStatus->setText(message);
+
+    mainPlotLive->LoadJsonFile(fileName);
 }
 
 void MainWindow::onPushButtonLoadClicked()
@@ -1159,7 +1234,11 @@ void MainWindow::onPushButtonUpdateLabelClicked()
 {
     pushButtonUpdateLabel->setChecked(true);
 
-    trackClient->sendUpdateLabel();
+    //trackClient->sendUpdateLabel();
+    if(server)
+    {
+        server->sendUpdateLabel();
+    }
 
 }
 
@@ -1283,7 +1362,8 @@ void MainWindow::loadInitServerFile()
 {
     QString fileName;
     //fileName = "initserver.json";
-    fileName = "0729  走廊.json";
+    //fileName = "0729  走廊.json";
+    fileName = "ypy.json";
     if(fileName.isEmpty()) {
         return;
     }
@@ -1399,6 +1479,7 @@ inline void MainWindow::initManager()
     m_nTimerId=0;
     m_nTimerCnt=0;
     m_nTimerId = startTimer(200);
+    onPushButtonLoadClicked_hand();
 }
 
 
