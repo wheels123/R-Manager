@@ -478,7 +478,7 @@ double TwoWayRegion::disPoint2Point(RobotPath rp,RobotPath rp2)
 void TwoWayRegion::setControl(Robot *robot)
 {
     qDebug() << "TwoWayRegion setControl start";
-    if(vectorRobot.size()==0) return;
+    if(robotIn.size()==0) return;
 
     int ctrlMode=2;
     QVector<int> control = robot->getRobotControl();

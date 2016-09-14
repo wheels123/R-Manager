@@ -28,10 +28,10 @@ QMainPlot::QMainPlot(QWidget *parent):
     //
     initPlotGrid();
 
-    const double xMin = -50.0;
-    const double xMax = 50.0;
-    const double yMin = -50.0;
-    const double yMax = 50.0;
+    const double xMin = -36.0;
+    const double xMax = 26.0;
+    const double yMin = 0.0;
+    const double yMax = 40.0;
     pointNum=0;
     setAxisScale(xBottom, xMin, xMax);
     setAxisScale(yLeft, yMin, yMax);

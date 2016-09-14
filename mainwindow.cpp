@@ -80,8 +80,6 @@ inline QWidget *MainWindow::initToolBarDrawing(QToolBar *toolBar)
     //
     // Create a label and a edit for hostname
     //
-
-
     pushButtonNoDrawing = new QPushButton("&禁止操作", hBoxWidget);
     pushButtonNoDrawing->setCheckable(true);
 
@@ -505,7 +503,7 @@ inline void MainWindow::initTrackClient()
 
 inline void MainWindow::initTrackServer()
 {
-    const QString ipAddrHead="192.168.31.";
+    const QString ipAddrHead="192.168.1.120";
 
     server = new FortuneServer(this);
 
@@ -513,18 +511,44 @@ inline void MainWindow::initTrackServer()
     QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
     QHostAddress selectAddr;
     // use the first non-localhost IPv4 address
-    for (int i = 0; i < ipAddressesList.size(); ++i) {
-        if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
-            ipAddressesList.at(i).toIPv4Address()) {
+    labelStatus->setText("wait for ip 31.200");
+    while(1)
+    {
+        for (int i = 0; i < ipAddressesList.size(); ++i) {
+            if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
+                ipAddressesList.at(i).toIPv4Address()) {
 
-            if(ipAddressesList.at(i).toString().indexOf(ipAddrHead)>=0)
-            {
-                selectAddr = ipAddressesList.at(i);
-                ipAddress = ipAddressesList.at(i).toString();
-                break;
+                if(ipAddressesList.at(i).toString().indexOf(ipAddrHead)>=0)
+                {
+                    selectAddr = ipAddressesList.at(i);
+                    ipAddress = ipAddressesList.at(i).toString();
+                    break;
+                }
             }
         }
+        if (!ipAddress.isEmpty())
+        {
+            quint16 port=9999;
+            // if we did not find one, use IPv4 localhost
+            if (ipAddress.isEmpty())
+                ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
+            labelStatus->setText(tr("The server is running on\n\nIP: %1\nport: %2\n\n"
+                                    "Run the Fortune Client example now.")
+                                 .arg(ipAddress).arg(port));
+
+            if (!server->listen(selectAddr,port)) {
+                labelStatus->setText(tr("Unable to start the server: %1.")
+                                                            .arg(server->errorString()));
+                QThread::sleep(1);
+            }
+            else
+            {
+              break;
+            }
+        }
+        QThread::sleep(1);
     }
+    /*
     quint16 port=9999;
     // if we did not find one, use IPv4 localhost
     if (ipAddress.isEmpty())
@@ -534,13 +558,17 @@ inline void MainWindow::initTrackServer()
                          .arg(ipAddress).arg(port));
 
     if (!server->listen(selectAddr,port)) {
-        QMessageBox::critical(this, tr("Threaded Fortune Server"),
-                              tr("Unable to start the server: %1.")
-                              .arg(server->errorString()));
+       // QMessageBox::critical(this, tr("Threaded Fortune Server"),
+       //                       tr("Unable to start the server: %1.")
+       //                       .arg(server->errorString()));
+        labelStatus->setText(tr("Unable to start the server: %1.")
+                                                    .arg(server->errorString()));
+
+        QThread::sleep(1);
         close();
         return;
     }
-
+    */
     loadInitServerFile();
 
     connect(server,
