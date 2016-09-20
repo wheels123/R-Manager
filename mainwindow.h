@@ -21,6 +21,9 @@
 #include "twowayregion.h"
 #include "control.h"
 #include "editshapeitem.h"
+#include <QSerialPort>
+#include <QSerialPortInfo>
+#include "myserialport.h"
 class QwtPointCus;
 class QCurveDataCus;
 class DialogOutputOption;
@@ -48,6 +51,7 @@ private:
     inline QWidget *initToolBarDrawing(QToolBar *toolBar);
     inline QWidget *initToolBarPoint(QToolBar *toolBar);
     inline QWidget *initToolBarShapeItem(QToolBar *toolBar);
+    void loadInitFile();
 private:
     // Toolbar items
     QLineEdit    *lineEditHost;
@@ -101,6 +105,10 @@ private:
 
     int m_nTimerId;
     int m_nTimerCnt;
+    QString tcpServerIPAddress;
+    QString tcpServerIPPort;
+    QString serialPortNum;
+    QSerialPort m_serialPort;
 private:
     // Button events
     inline void onButtonConnectClicked();
@@ -152,6 +160,7 @@ private:
     void onPushButtonLoadClicked_hand();
 private slots:
     void onShapeItemTypeChanged(int index);
+    void readyReadSlot();
 
 };
 

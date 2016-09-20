@@ -9,8 +9,9 @@ QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 #DEFINES += QT_NO_WARNING_OUTPUT\
 #                   QT_NO_DEBUG_OUTPUT
-QT       += network
+QT += network
 QT += gui
+QT += serialport
 CONFIG += c++11
 CONFIG += qwt
 
@@ -37,7 +38,8 @@ SOURCES += main.cpp\
     control.cpp \
     twowayregion.cpp \
     onewayregion.cpp \
-    robotmath.cpp
+    robotmath.cpp \
+    myserialport.cpp
 
 HEADERS  += mainwindow.h \
         qmainplot.h \
@@ -57,7 +59,8 @@ HEADERS  += mainwindow.h \
     control.h \
     twowayregion.h \
     onewayregion.h \
-    robotmath.h
+    robotmath.h \
+    myserialport.h
 
 FORMS += \
     dialogoutputoption.ui \

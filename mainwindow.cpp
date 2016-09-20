@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     shapeItem.insertPoint(c);
     shapeItem.insertPoint(d);
 
-    double dis1,dis2,dis3;
+    double dis1,dis2,dis3;192.168
     bool ret1 = shapeItem.pointToPolygonDis(RobotPoint(5,5,0),dis1);
     bool ret2 = shapeItem.pointToPolygonDis(RobotPoint(5,15,0),dis2);
     bool ret3 = shapeItem.pointToPolygonDis(RobotPoint(15,15,0),dis3);
@@ -33,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent)
     dlgServer=NULL;
     server=NULL;
     manager=NULL;
+    loadInitFile();
+
     initToolBar();
 
     initCentralWidget();
@@ -503,7 +505,7 @@ inline void MainWindow::initTrackClient()
 
 inline void MainWindow::initTrackServer()
 {
-    const QString ipAddrHead="192.168.1.120";
+    const QString ipAddrHead=tcpServerIPAddress;
 
     server = new FortuneServer(this);
 
@@ -528,7 +530,13 @@ inline void MainWindow::initTrackServer()
         }
         if (!ipAddress.isEmpty())
         {
+            bool ok=false;
             quint16 port=9999;
+            int tPort= tcpServerIPPort.toInt(&ok,10);
+            if(ok)
+            {
+                port=tPort;
+            }
             // if we did not find one, use IPv4 localhost
             if (ipAddress.isEmpty())
                 ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
@@ -1553,4 +1561,99 @@ void MainWindow::timerEvent( QTimerEvent *event )
         robot->resetControlValue();
         manager->setRegion(item,path,robot);
     }
+}
+
+/*read ini config file*/
+#include <QtCore/QCoreApplication>
+#include <QSettings>
+#include <QString>
+#include <QDebug>
+
+void MainWindow::loadInitFile()
+{
+   QSettings *configIniRead = new QSettings("config.ini", QSettings::IniFormat);
+   //将读取到的ini文件保存在QString中，先取值，然后通过toString()函数转换成QString类型
+   QString ipAddress = configIniRead->value("/server/ip","192.168.1.").toString();
+   QString ipPort = configIniRead->value("/server/port","9999").toString();
+   QString comPort = configIniRead->value("/server/com","COM").toString();
+
+   //读入入完成后删除指针
+   delete configIniRead;
+   //打印得到的结果
+   qDebug() << ipAddress;
+   qDebug() << ipPort;
+   qDebug() << comPort;
+
+   tcpServerIPAddress = ipAddress;
+   tcpServerIPPort = ipPort;
+   serialPortNum = comPort;
+
+
+   /*
+   QSerialPortInfo portInfo;
+   foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+   {
+       qDebug() << "Name : " << info.portName();
+       qDebug() << "Description : " << info.description();
+       qDebug() << "Manufacturer: " << info.manufacturer();
+       qDebug() << "Serial Number: " << info.serialNumber();
+       qDebug() << "System Location: " << info.systemLocation();
+
+       if(info.portName() == serialPortNum)
+       {
+          portInfo=info;
+       }
+   }
+
+
+    m_serialPort.setPort(portInfo);
+    if(m_serialPort.open(QIODevice::ReadWrite))
+    {
+        qDebug() << "m_reader.open(QIODevice::ReadWrite)";
+        m_serialPort.setBaudRate(QSerialPort::Baud4800);
+        m_serialPort.setParity(QSerialPort::NoParity);
+        m_serialPort.setDataBits(QSerialPort::Data8);
+        m_serialPort.setStopBits(QSerialPort::OneStop);
+        m_serialPort.setFlowControl(QSerialPort::NoFlowControl);
+
+        m_serialPort.clearError();
+        m_serialPort.clear();
+        connect(&m_serialPort, SIGNAL(readyRead()), this, SLOT(readyReadSlot()));
+    }
+    */
+}
+/*
+
+void MainWindow::readyReadSlot()
+{
+    while (m_serialPort.canReadLine()) {
+        QByteArray arr = m_serialPort.readLine();
+        if (arr.isEmpty()) {
+            qDebug() << Q_FUNC_INFO << __LINE__;
+            break;
+        }
+        qDebug()<<arr.data();
+        //processData(data);
+    }
+}
+*/
+
+void MainWindow::initComPort()
+{
+    bool ok=false;
+    int cnt=0;
+    while(1)
+    {
+        ok=m_serialPort.init(serialPortNum);
+        QString str="initComPort "+serialPortNum+" "+QString::number((int)cnt++, 10);
+        labelStatus->setText(str);
+        if(ok==true)
+        {
+            break;
+        }
+        QThread::sleep(1);
+    }
+    QString str="initComPort "+serialPortNum+"success ";
+    labelStatus->setText(str);
+
 }
