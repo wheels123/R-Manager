@@ -6,6 +6,12 @@
 #include <QFileDialog>
 #include <QtWidgets>
 #include <QtNetwork>
+/*read ini config file*/
+#include <QtCore/QCoreApplication>
+#include <QSettings>
+#include <QString>
+#include <QDebug>
+
 //
 // Constructor and deconstructor
 //
@@ -13,26 +19,11 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
 
-    //
-/*
-    EditShapeItem shapeItem;
-    QPointF a(0,0),b(10,0),c(10,10),d(0,10);
-
-    shapeItem.insertPoint(a);
-    shapeItem.insertPoint(b);
-    shapeItem.insertPoint(c);
-    shapeItem.insertPoint(d);
-
-    double dis1,dis2,dis3;192.168
-    bool ret1 = shapeItem.pointToPolygonDis(RobotPoint(5,5,0),dis1);
-    bool ret2 = shapeItem.pointToPolygonDis(RobotPoint(5,15,0),dis2);
-    bool ret3 = shapeItem.pointToPolygonDis(RobotPoint(15,15,0),dis3);
-    */
-    //
     dlgOutputOption=NULL;
     dlgServer=NULL;
     server=NULL;
     manager=NULL;
+
     loadInitFile();
 
     initToolBar();
@@ -48,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
     initTrackServer();
 
     initManager();
+
+    initComPort();
 }
 
 MainWindow::~MainWindow()
@@ -1563,11 +1556,6 @@ void MainWindow::timerEvent( QTimerEvent *event )
     }
 }
 
-/*read ini config file*/
-#include <QtCore/QCoreApplication>
-#include <QSettings>
-#include <QString>
-#include <QDebug>
 
 void MainWindow::loadInitFile()
 {
@@ -1587,56 +1575,8 @@ void MainWindow::loadInitFile()
    tcpServerIPAddress = ipAddress;
    tcpServerIPPort = ipPort;
    serialPortNum = comPort;
-
-
-   /*
-   QSerialPortInfo portInfo;
-   foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
-   {
-       qDebug() << "Name : " << info.portName();
-       qDebug() << "Description : " << info.description();
-       qDebug() << "Manufacturer: " << info.manufacturer();
-       qDebug() << "Serial Number: " << info.serialNumber();
-       qDebug() << "System Location: " << info.systemLocation();
-
-       if(info.portName() == serialPortNum)
-       {
-          portInfo=info;
-       }
-   }
-
-
-    m_serialPort.setPort(portInfo);
-    if(m_serialPort.open(QIODevice::ReadWrite))
-    {
-        qDebug() << "m_reader.open(QIODevice::ReadWrite)";
-        m_serialPort.setBaudRate(QSerialPort::Baud4800);
-        m_serialPort.setParity(QSerialPort::NoParity);
-        m_serialPort.setDataBits(QSerialPort::Data8);
-        m_serialPort.setStopBits(QSerialPort::OneStop);
-        m_serialPort.setFlowControl(QSerialPort::NoFlowControl);
-
-        m_serialPort.clearError();
-        m_serialPort.clear();
-        connect(&m_serialPort, SIGNAL(readyRead()), this, SLOT(readyReadSlot()));
-    }
-    */
 }
-/*
 
-void MainWindow::readyReadSlot()
-{
-    while (m_serialPort.canReadLine()) {
-        QByteArray arr = m_serialPort.readLine();
-        if (arr.isEmpty()) {
-            qDebug() << Q_FUNC_INFO << __LINE__;
-            break;
-        }
-        qDebug()<<arr.data();
-        //processData(data);
-    }
-}
-*/
 
 void MainWindow::initComPort()
 {
@@ -1655,5 +1595,4 @@ void MainWindow::initComPort()
     }
     QString str="initComPort "+serialPortNum+"success ";
     labelStatus->setText(str);
-
 }

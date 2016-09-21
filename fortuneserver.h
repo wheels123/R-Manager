@@ -47,6 +47,8 @@
 #include <QVector>
 #include "robot.h"
 #include "QTimer.h"
+#include "myserialport.h"
+
 class QTcpServer;
 class QTcpSocket;
 

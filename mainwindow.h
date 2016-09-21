@@ -52,6 +52,7 @@ private:
     inline QWidget *initToolBarPoint(QToolBar *toolBar);
     inline QWidget *initToolBarShapeItem(QToolBar *toolBar);
     void loadInitFile();
+    void initComPort();
 private:
     // Toolbar items
     QLineEdit    *lineEditHost;
@@ -108,7 +109,7 @@ private:
     QString tcpServerIPAddress;
     QString tcpServerIPPort;
     QString serialPortNum;
-    QSerialPort m_serialPort;
+    MySerialPort m_serialPort;
 private:
     // Button events
     inline void onButtonConnectClicked();
@@ -160,7 +161,6 @@ private:
     void onPushButtonLoadClicked_hand();
 private slots:
     void onShapeItemTypeChanged(int index);
-    void readyReadSlot();
 
 };
 
