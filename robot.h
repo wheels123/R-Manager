@@ -58,7 +58,23 @@ public:
         return ret;
     }*/
 };
+class RobotDestPoint
+{
+public:
+    RobotPoint point;
+    int id;
+public:
+    inline int getId() const
+    {
+        return id;
+    }
 
+    inline void setId(int a)
+    {
+        id=a;
+    }
+
+};
 class RobotPathPoint
 {
 public:
@@ -323,7 +339,10 @@ public:
      QVector<QVector<RobotPathPoint>> getPose();
      void estimateRobotPose();
 public:
-
+     void clearDest();
+     void insertDest(RobotDestPoint rp);
+     QStringList destToString();
+     int getDestNum();
 private:
     QVector<RobotPath> path;
     QVector<RobotPathPoint> mainPath;
@@ -335,6 +354,8 @@ private:
     QVector<RobotPoint> vectorPoseB;
 
     QVector<QVector<RobotPathPoint>> vectorPose;
+
+    QVector<RobotDestPoint> dest;
 };
 
 #endif // ROBOT_H

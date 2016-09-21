@@ -580,6 +580,25 @@ void Robot::loadData(QCurveDataCus *data,QwtPointCus::PointStyle type)
            }
         }
     }
+    else if(type==QwtPointCus::Dest)
+    {
+        clearDest();
+
+        QwtPointCus pointCus(QwtPointCus::PointStyle::Label,0,0,0,0);
+        for(int i=0;i<sizeLoad;i++)
+        {
+           RobotDestPoint dp;
+           pointCus=data->sample(i);
+           if(pointCus.id()<100000)
+           {
+               dp.id=pointCus.id();
+               dp.point.x=pointCus.x();
+               dp.point.y=pointCus.y();
+               dp.point.phi=pointCus.phi();
+               insertDest(dp);
+           }
+        }
+    }
 }
 
 
@@ -1682,4 +1701,57 @@ QVector<int> RobotPath::getNearPointIdById()
         }
     }
     return p;
+}
+
+
+
+void Robot::clearDest()
+{
+    QMutexLocker locker(&mutex);
+    /*
+    QString s1;
+    s1.append("clearMainPath ");
+    s1.append(QString::number(mainPath.size(),10));
+    s1.append(" ");
+    */
+    QVector<RobotDestPoint>().swap(dest);
+    //s1.append(QString::number(mainPath.size(),10));
+    //qDebug()<<s1;
+
+}
+
+void Robot::insertDest(RobotDestPoint rp)
+{
+   QMutexLocker locker(&mutex);
+   dest.append(rp);
+}
+
+QStringList Robot::destToString()
+{
+    QStringList list;
+    int pathNum=dest.size();
+    for(int i=0;i<pathNum;i++)
+    {
+        QString str;
+        RobotDestPoint point= dest.at(i);
+        str.append(QString::number(i,10));
+        str.append(" ");
+        str.append(QString::number(pathNum,10));
+        str.append(" ");
+        str.append(QString::number(point.id,10));
+        str.append(" ");
+        str.append(QString::number(point.point.x,'f',3));
+        str.append(" ");
+        str.append(QString::number(point.point.y,'f',3));
+        str.append(" ");
+        str.append(QString::number(point.point.phi,'f',3));
+        list.append(str);
+    }
+    return list;
+}
+
+int Robot::getDestNum()
+{
+    QMutexLocker locker(&mutex);
+    return  dest.size();
 }

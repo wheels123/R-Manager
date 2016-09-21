@@ -3,38 +3,70 @@
 
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#include "robot.h"
+#include "QTimer.h"
+#include <QObject>
+#include <QDebug>
+#include <QThreadPool>
+#include <qevent.h>
+#include <qwt_point_cus.h>
+class QTimer;
+class QTimerEvent;
 class MySerialPort : public QSerialPort
 {
+    Q_OBJECT                     ////////--------------------------------------------///////// very important
+    #define ROBOT_SN_MIN 1
 public:
-    MySerialPort();
+    explicit MySerialPort(QObject *parent = Q_NULLPTR);
+    ~MySerialPort();
     bool init(QString port);
-    inline void processData(QString &data);
-    inline void transData(QString &data);
-    void sendSN(int sn);
-    void sendSNOK(int sn);
-private:
-    QSerialPort m_serialPort;
-
-private slots:
-    void readyReadSlot();
 
 signals:
-    void updateClientStatus(QTcpSocket* socket,int state);
-    void updateRobotPath(QTcpSocket* socket,int robotId, int pathId,int pointNum,int pointId,double x,double y,double phi);
-    void updateRobotPathByMainPath(QTcpSocket* socket,int robotId, int pathId,int pointNum,int pointId,int mainPathId);
-    void updateClientSN(QTcpSocket* socket,int sn);
-    void updateRobotState(QTcpSocket* socket,int robotId,double x,double y,double phi,double left,double right,int goMainPathId,int robotState,int robotMode);
-
-    void newPoint(const QwtPointCus point);
+    void updataRobotPathServer(Robot* robot);
+    void updataRobotPathServerState(Robot* robot);
+    void onNewRobotMsg(QString str);
+    void newPointServer(QwtPointCus point);
 
 protected:
-    Robot robot;
+    void onUpdateRobotPath(int robotId, int pathId,int pointNum,int pointId,double x,double y,double phi);
+    void onUpdateRobotPathByMainPath(int robotId, int pathId,int pointNum,int pointId,int mainPathId);
+    void onUpdateRobotState(int robotId,double x,double y,double phi,double left,double right,int goMainPathId,int robotState,int robotType);
     void timerEvent( QTimerEvent *event );
+    void robotMsg(QString str);
+    void onNewPoint(const QwtPointCus point);
+    void onUpdateSN(int sn);
+
+public:
+    inline void processData(QString &data);
+    inline void transData(QString &data);
+    void sendDate();
+    void loadData(QCurveDataCus *data,QwtPointCus::PointStyle type);
+    Robot* getRobotHandle();
+    int getSerialNumberMax();
+    int newSerialNumber();
+    int findSerialNumber(int sn);
+    void sendControlCmd(int sn,int cmd);
+    QVector<RobotPoint> getPose(int n);
+    QVector<QVector<RobotPathPoint>> getPose();
+
+    void sendSN(int sn);
+    void sendSNOK(int sn);
+//////////////////////
+/// build map function
+//////////////////////
+    void sendUpdateLabel();
+    void sendDelelteLabel(int labelNum);
+private:
+    //QSerialPort m_serialPort;
+    Robot robot;
     int m_nTimerId;
     int m_disconnect_times;
     bool m_heart;
     bool m_connected;
     int m_status;
+
+private slots:
+    void readyReadSlot();
 };
 
 #endif // MYSERIALPORT_H

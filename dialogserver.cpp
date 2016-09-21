@@ -83,7 +83,7 @@ DialogServer::~DialogServer()
  {
     QStandardItemModel *qstmodel=new QStandardItemModel();
     int pathNum=robot->getMainPathNum();
-
+    int destNum=robot->getDestNum();
     QString pathname;
     pathname.append("MP ");
     pathname.append(" MaxNum ");
@@ -96,8 +96,22 @@ DialogServer::~DialogServer()
        QStandardItem* itemSub    = new QStandardItem(list.at(j));
        item->appendRow(itemSub);
     }
-    qstmodel->appendRow(item);
+////////////////
+    QString destname;
+    destname.append("Dest ");
+    destname.append(" MaxNum ");
+    destname.append(QString::number(destNum,10));
+    QStandardItem* itemdest    = new QStandardItem(destname);
+    QStringList listdest = robot->destToString();
 
+    for(int j=0;j<listdest.size();j++)
+    {
+       QStandardItem* itemSub    = new QStandardItem(listdest.at(j));
+       itemdest->appendRow(itemSub);
+    }
+
+    qstmodel->appendRow(item);
+    qstmodel->appendRow(itemdest);
     ui->treeViewMainPath->setModel(qstmodel);
     ui->treeViewMainPath->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeViewMainPath->setAutoFillBackground(true);

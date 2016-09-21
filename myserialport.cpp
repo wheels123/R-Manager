@@ -1,15 +1,16 @@
 #include "myserialport.h"
 
-MySerialPort::MySerialPort()
+MySerialPort::MySerialPort(QObject *parent ):
+    QSerialPort(parent)
 {
-
+    m_nTimerId=0;
+    m_nTimerId = startTimer(100);
 }
-
-/*read ini config file*/
-#include <QtCore/QCoreApplication>
-#include <QSettings>
-#include <QString>
-#include <QDebug>
+MySerialPort::~MySerialPort()
+{
+    if ( m_nTimerId != 0 )
+        killTimer(m_nTimerId);
+}
 
 bool MySerialPort::init(QString port)
 {
@@ -32,33 +33,35 @@ bool MySerialPort::init(QString port)
        }
    }
 
-    m_serialPort.setPort(portInfo);
-    if(m_serialPort.open(QIODevice::ReadWrite))
+    setPort(portInfo);
+    if(open(QIODevice::ReadWrite))
     {
         qDebug() << "m_reader.open(QIODevice::ReadWrite)";
-        m_serialPort.setBaudRate(QSerialPort::Baud4800);
-        m_serialPort.setParity(QSerialPort::NoParity);
-        m_serialPort.setDataBits(QSerialPort::Data8);
-        m_serialPort.setStopBits(QSerialPort::OneStop);
-        m_serialPort.setFlowControl(QSerialPort::NoFlowControl);
+        setBaudRate(QSerialPort::Baud4800);
+        setParity(QSerialPort::NoParity);
+        setDataBits(QSerialPort::Data8);
+        setStopBits(QSerialPort::OneStop);
+        setFlowControl(QSerialPort::NoFlowControl);
 
-        m_serialPort.clearError();
-        m_serialPort.clear();
-        connect(&m_serialPort, SIGNAL(readyRead()), this, SLOT(readyReadSlot()));
+        clearError();
+        clear();
+        connect(this, SIGNAL(readyRead()), this, SLOT(readyReadSlot()));
         return true;
     }
 }
 
 void MySerialPort::readyReadSlot()
 {
-    while (m_serialPort.canReadLine()) {
-        QByteArray arr = m_serialPort.readLine();
+    while (canReadLine()) {
+        QByteArray arr = readLine();
         if (arr.isEmpty()) {
             qDebug() << Q_FUNC_INFO << __LINE__;
             break;
         }
         qDebug()<<arr.data();
-        processData(data);
+        QString s;
+        s.prepend(arr);
+        processData(s);
     }
 }
 
@@ -107,7 +110,7 @@ inline void MySerialPort::transData(QString &data)
             QByteArray buf;
             buf.append("`\n");
             //sendBack(buf);
-            socket->write(buf);
+            write(buf);
             m_heart=true;
             qDebug()<<"heart!";
         }
@@ -147,7 +150,7 @@ inline void MySerialPort::transData(QString &data)
         double y = splitData.at(++atId).toDouble(&ret);if(ret==false){qDebug() << "trans path error data["<<data<<"] at["<<QString::number(atId, 10)<<"]";return;}
         double p = splitData.at(++atId).toDouble(&ret);if(ret==false){qDebug() << "trans path error data["<<data<<"] at["<<QString::number(atId, 10)<<"]";return;}
         qDebug()<<"get path";
-        emit updateRobotPath( socket,robotId,pathId, pointNum, pointId, x, y,p);
+        onUpdateRobotPath( robotId,pathId, pointNum, pointId, x, y,p);
     }
     else if(type=="P"&&itemNo==6)
     {
@@ -162,7 +165,7 @@ inline void MySerialPort::transData(QString &data)
         //double y = splitData.at(++atId).toDouble(&ret);if(ret==false){qDebug() << "trans path error data["<<data<<"] at["<<QString::number(atId, 10)<<"]";return;}
         //double p = splitData.at(++atId).toDouble(&ret);if(ret==false){qDebug() << "trans path error data["<<data<<"] at["<<QString::number(atId, 10)<<"]";return;}
         qDebug()<<"get path2";
-        emit updateRobotPathByMainPath(socket, robotId,pathId, pointNum, pointId,mainPathId);
+        onUpdateRobotPathByMainPath( robotId,pathId, pointNum, pointId,mainPathId);
     }
     else if(type=="CSN"&&itemNo==2)
     {
@@ -170,7 +173,7 @@ inline void MySerialPort::transData(QString &data)
         int atId=0;
         int sn = splitData.at(++atId).toInt(&ret,10); if(ret==false){qDebug() << "trans path error data["<<data<<"] at["<<QString::number(atId, 10)<<"]";return;}
         qDebug()<<"get sn";
-        emit updateClientSN(socket,sn);
+        onUpdateSN(sn);
     }
     else if(type=="S"&&itemNo==10)
     {
@@ -188,7 +191,7 @@ inline void MySerialPort::transData(QString &data)
         int robotType = splitData.at(++atId).toInt(&ret,10);if(ret==false){qDebug() << "trans path error data["<<data<<"] at["<<QString::number(atId, 10)<<"]";return;}
 
         //qDebug()<<"get robot state";
-        emit updateRobotState(socket,robotId,x, y,p,left,right,goMainPathId,robotState,robotType);
+        onUpdateRobotState(robotId,x, y,p,left,right,goMainPathId,robotState,robotType);
     }
     else if((type=="@"||type=="#"||type=="$")&&itemNo==5)
     {
@@ -218,26 +221,167 @@ inline void MySerialPort::transData(QString &data)
         QwtPointCus pointData(style,tagNo,(double)xValue/xScale,(double)yValue/yScale,(double)angleValue/phiScale);
 
         qDebug()<<"get bm point";
-        emit newPoint(pointData);
+        onNewPoint(pointData);
 
     }
 }
 
 
-void MySerialPort::sendSN(int sn)
-{
-    QByteArray Buffer;
-    Buffer.append("SN,");
-    Buffer.append(QString::number(sn,10));
-    Buffer.append("\n");
-    socket->write(Buffer);
-}
+ void MySerialPort::onUpdateRobotPath(int robotId, int pathId,int pointNum,int pointId,double x,double y,double phi)
+ {
+    RobotPoint rp;
+    rp.x=x;
+    rp.y=y;
+    rp.phi=phi;
 
-void MySerialPort::sendSNOK(int sn)
-{
-    QByteArray Buffer;
-    Buffer.append("SNOK,");
-    Buffer.append(QString::number(sn,10));
-    Buffer.append("\n");
-    socket->write(Buffer);
-}
+    int ret = robot.insertPathPoint(robotId,pathId,rp,pointNum,pointId);
+     qDebug() <<"insertPathPoint by piont ret "<<QString::number(ret,10);
+
+    robot.updateControlNum();
+    emit updataRobotPathServer(&robot);
+ }
+
+ void MySerialPort::onUpdateRobotPathByMainPath(int robotId, int pathId,int pointNum,int pointId,int mainPathId)
+ {
+    int ret = robot.insertPathPoint(robotId,pathId,mainPathId,pointNum,pointId);
+     qDebug() <<"insertPathPoint by id ret "<<QString::number(ret,10);
+    emit updataRobotPathServer(&robot);
+ }
+
+ void MySerialPort::loadData(QCurveDataCus *data,QwtPointCus::PointStyle type)
+ {
+     robot.loadData(data,type);
+ }
+
+ Robot* MySerialPort::getRobotHandle()
+ {
+     return &robot;
+ }
+
+
+ void MySerialPort::onUpdateRobotState(int robotId,double x,double y,double phi,double left,double right,int goMainPathId,int robotState,int robotType)
+ {
+     RobotPoint rp;
+     rp.x=x;
+     rp.y=y;
+     rp.phi=phi;
+
+     int ret = robot.insertRobotState(robotId,rp,left,right,goMainPathId,robotState,robotType);
+
+     emit updataRobotPathServerState(&robot);
+
+     emit onNewRobotMsg(robot.getMsg());
+ }
+
+ void MySerialPort::timerEvent( QTimerEvent *event )
+ {
+     for(int i=0;i<robot.getPathNum();i++)
+     {
+         int sn = robot.getPathRobotIdByIndex(i);
+         if(sn>=ROBOT_SN_MIN)
+         {
+            //sendControlCmd(sn,robot.getRobotControl(i));
+         }
+     }
+
+ }
+
+
+ void MySerialPort::sendUpdateLabel()
+ {
+     QByteArray dataWrite;
+     QString str;
+     str.sprintf("$UDL%5d\n",0);
+     dataWrite=str.toLatin1();
+     write(dataWrite,dataWrite.size());
+ }
+
+ void MySerialPort::sendDelelteLabel(int labelNum)
+ {
+     QByteArray dataWrite;
+     QString str;
+     str.sprintf("$UDL%5d\n",labelNum);
+     dataWrite=str.toLatin1();
+     write(dataWrite,dataWrite.size());
+ }
+
+
+ void MySerialPort::sendControlCmd(int sn,int cmd)
+ {
+     QByteArray Buffer;
+     Buffer.append("CTRL,");
+     Buffer.append(QString::number(sn,10));
+     Buffer.append(",");
+     Buffer.append(QString::number(cmd,10));
+     Buffer.append("\n");
+     write(Buffer);
+ }
+
+  QVector<RobotPoint> MySerialPort::getPose(int n)
+  {
+      robot.estimateRobotPose(n);
+      return robot.getPose(n);
+  }
+
+  QVector<QVector<RobotPathPoint>> MySerialPort::getPose()
+  {
+      robot.estimateRobotPose();
+      return robot.getPose();
+  }
+
+  void MySerialPort::onNewPoint(const QwtPointCus point)
+  {
+      emit newPointServer(point);
+  }
+
+  void MySerialPort::onUpdateSN(int sn)
+  {
+      int index=0;
+      bool find = robot.findRobotId(sn,index);
+      QByteArray Buffer;
+
+      if(sn<ROBOT_SN_MIN)
+      {
+          Buffer.append("\r\nonUpdateClientSN new sn invalid ");
+          Buffer.append(QString::number(sn,10));
+          qDebug( Buffer.data());
+          return;
+      }
+      if(find==true)
+      {
+          Buffer.append("\r\nonUpdateClientSN new sn exist ");
+          Buffer.append(QString::number(sn,10));
+          qDebug( Buffer.data());
+          return;
+      }
+      Buffer.append("\r\nonUpdateSN ");
+      Buffer.append(QString::number(sn,10));
+      qDebug( Buffer.data());
+
+      RobotPoint rp;
+      rp.x=0;
+      rp.y=0;
+      rp.phi=0;
+      int ret = robot.insertRobotState(sn,rp,0,0,0,0,0);
+      emit updataRobotPathServerState(&robot);
+      emit onNewRobotMsg(robot.getMsg());
+      sendSNOK(sn);
+  }
+
+  void MySerialPort::sendSN(int sn)
+  {
+      QByteArray Buffer;
+      Buffer.append("SN,");
+      Buffer.append(QString::number(sn,10));
+      Buffer.append("\n");
+      write(Buffer);
+  }
+
+  void MySerialPort::sendSNOK(int sn)
+  {
+      QByteArray Buffer;
+      Buffer.append("SNOK,");
+      Buffer.append(QString::number(sn,10));
+      Buffer.append("\n");
+      write(Buffer);
+  }

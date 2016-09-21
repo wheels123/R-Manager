@@ -23,7 +23,9 @@ MainWindow::MainWindow(QWidget *parent)
     dlgServer=NULL;
     server=NULL;
     manager=NULL;
-
+    myserialPort=NULL;
+    serialPortInitOK=false;
+    useUART=true;
     loadInitFile();
 
     initToolBar();
@@ -36,11 +38,20 @@ MainWindow::MainWindow(QWidget *parent)
 
     initDialog();
 
-    initTrackServer();
-
     initManager();
 
-    initComPort();
+    if(useUART)
+    {
+        initComPort();
+    }
+    else
+    {
+        initTrackServer();
+    }
+
+
+
+
 }
 
 MainWindow::~MainWindow()
@@ -614,7 +625,11 @@ inline void MainWindow::onButtonConnectClicked()
     trackClient->connectToHost(lineEditHost->text(),
                                lineEditPort->text().toInt());
 
-    server->sendDate();
+    if(server)
+    {
+       server->sendDate();
+    }
+
 }
 
 inline void MainWindow::onButtonDisconnectClicked()
@@ -763,7 +778,7 @@ void MainWindow::onPushButtonLoadClicked_hand()
 {
     QString fileName;
     QString fileNameNormal;
-    fileName = "ypy.json";
+    fileName = mapFileName;
     if(fileName.isEmpty()) {
         return;
     }
@@ -1392,23 +1407,22 @@ void MainWindow::loadInitServerFile()
     QString fileName;
     //fileName = "initserver.json";
     //fileName = "0729  走廊.json";
-    fileName = "ypy.json";
+    fileName = mapFileName;
     if(fileName.isEmpty()) {
         return;
     }
     QString message;
     bool result = trackClient->LoadJsonFile(fileName);
     if (result) {
-        message = "Status : " + fileName + " loaded";
+        message = "loadInitTcpServerFile : " + fileName + " loaded";
         QCurveDataCus *dataPath = trackClient->getPathData();
-        if(dataPath!=NULL)
+        if(dataPath!=NULL&&server)
         {
-
             server->loadData(dataPath,QwtPointCus::PathPoint);
         }
         else
         {
-            message = "Status : failed to load Path " + fileName;
+            message = "loadInitTcpServerFile : failed to load Path " + fileName;
         }
         if(dlgServer&&server)
         {
@@ -1416,12 +1430,56 @@ void MainWindow::loadInitServerFile()
         }
 
     } else {
-        message = "Status : failed to load " + fileName;
+        message = "loadInitTcpServerFile : failed to load " + fileName;
     }
 
     labelStatus->setText(message);
 
 
+}
+
+void MainWindow::loadInitComServerFile()
+{
+    QString fileName;
+    //fileName = "initserver.json";
+    //fileName = "0729  走廊.json";
+    fileName = mapFileName;
+    if(fileName.isEmpty()) {
+        return;
+    }
+    QString message;
+    bool result = trackClient->LoadJsonFile(fileName);
+    if (result) {
+        message = "loadInitComServerFile : " + fileName + " loaded";
+        QCurveDataCus *dataPath = trackClient->getPathData();
+        QCurveDataCus *dataDest = trackClient->getDestData();
+        if(dataPath!=NULL&&myserialPort)
+        {
+            myserialPort->loadData(dataPath,QwtPointCus::PathPoint);
+        }
+        else
+        {
+            message = "loadInitComServerFile : failed to load Path " + fileName;
+        }
+
+        if(dataDest!=NULL&&myserialPort)
+        {
+            myserialPort->loadData(dataDest,QwtPointCus::Dest);
+        }
+        else
+        {
+            message = "loadInitComServerFile : failed to load Dest " + fileName;
+        }
+        if(dlgServer&&myserialPort)
+        {
+            dlgServer->updateTreeViewMainPath(myserialPort->getRobotHandle());
+        }
+
+    } else {
+        message = "loadInitComServerFile : failed to load " + fileName;
+    }
+
+    labelStatus->setText(message);
 }
 
 void MainWindow::onNewClientSN(ClientSocketList* list, const QTcpSocket* socket ,int sn)
@@ -1519,6 +1577,7 @@ void MainWindow::onNewPointServer(const QwtPointCus point)
 
 void MainWindow::timerEvent( QTimerEvent *event )
 {
+    static int cnt=0;
     m_nTimerCnt++;
     //qDebug( "MainWindow timerEvent");
 
@@ -1527,8 +1586,49 @@ void MainWindow::timerEvent( QTimerEvent *event )
         m_nTimerCnt=0;
         if(dlgServer)
         {
-            Robot *robot = server->getRobotHandle();
-            dlgServer->updateTreeViewPath(robot);
+            if(server)
+            {
+                Robot *robot = server->getRobotHandle();
+                dlgServer->updateTreeViewPath(robot);
+            }
+            if(myserialPort)
+            {
+                Robot *robot = myserialPort->getRobotHandle();
+                dlgServer->updateTreeViewPath(robot);
+            }
+        }
+        if(myserialPort!=NULL&&serialPortInitOK==false)
+        {
+            bool ok=myserialPort->init(serialPortNum);
+            QString str="initComPort "+serialPortNum+" "+QString::number((int)cnt++, 10);
+            labelStatus->setText(str);
+            if(ok==true)
+            {
+                loadInitComServerFile();
+                connect(myserialPort,
+                        &MySerialPort::updataRobotPathServer,
+                        this,
+                        &MainWindow::onUpdataRobotPathServer);
+
+                connect(myserialPort,
+                        &MySerialPort::updataRobotPathServerState,
+                        this,
+                        &MainWindow::onUpdataRobotPathServerState);
+
+                connect(myserialPort,
+                        &MySerialPort::onNewRobotMsg,
+                        this,
+                        &MainWindow::onNewRobotMsg);
+
+                connect(myserialPort,
+                        &MySerialPort::newPointServer,
+                        this,
+                        &MainWindow::onNewPointServer);
+
+                QString str="initComPort "+serialPortNum+" success ";
+                labelStatus->setText(str);
+                serialPortInitOK=true;
+            }
         }
     }
 
@@ -1536,23 +1636,31 @@ void MainWindow::timerEvent( QTimerEvent *event )
     {
         if(server)
         {
-/*
-            QVector<RobotPoint> ra = server->getPose(0);
-            QVector<RobotPoint> rb = server->getPose(1);
-            mainPlotLive->showPose(ra,0);
-            mainPlotLive->showPose(rb,1);
-*/
             QVector<QVector<RobotPathPoint>> pose=server->getPose();
             mainPlotLive->showPose(pose);
-
+        }
+        if(myserialPort)
+        {
+            QVector<QVector<RobotPathPoint>> pose=myserialPort->getPose();
+            mainPlotLive->showPose(pose);
         }
         //qDebug()<<"manager ";
         QCurveDataCus* path = mainPlotLive->getPathData();
         QVector<EditShapeItem *> item = mainPlotLive->getShapeItemData();
-        Robot *robot = server->getRobotHandle();
-        robot->updateControlNum();
-        robot->resetControlValue();
-        manager->setRegion(item,path,robot);
+        if(server)
+        {
+            Robot *robot = server->getRobotHandle();
+            robot->updateControlNum();
+            robot->resetControlValue();
+            manager->setRegion(item,path,robot);
+        }
+        if(myserialPort)
+        {
+            Robot *robot = myserialPort->getRobotHandle();
+            robot->updateControlNum();
+            robot->resetControlValue();
+            manager->setRegion(item,path,robot);
+        }
     }
 }
 
@@ -1564,35 +1672,25 @@ void MainWindow::loadInitFile()
    QString ipAddress = configIniRead->value("/server/ip","192.168.1.").toString();
    QString ipPort = configIniRead->value("/server/port","9999").toString();
    QString comPort = configIniRead->value("/server/com","COM").toString();
-
+   QString wireLessMode = configIniRead->value("/server/mode","UART").toString();
+   QString fileName = configIniRead->value("/map/name","map.json").toString();
    //读入入完成后删除指针
    delete configIniRead;
    //打印得到的结果
    qDebug() << ipAddress;
    qDebug() << ipPort;
    qDebug() << comPort;
-
+   qDebug() << wireLessMode;
+   qDebug() << fileName;
    tcpServerIPAddress = ipAddress;
    tcpServerIPPort = ipPort;
    serialPortNum = comPort;
+   useUART = (wireLessMode == "UART")?true:false;
+   mapFileName = fileName;
 }
 
 
 void MainWindow::initComPort()
 {
-    bool ok=false;
-    int cnt=0;
-    while(1)
-    {
-        ok=m_serialPort.init(serialPortNum);
-        QString str="initComPort "+serialPortNum+" "+QString::number((int)cnt++, 10);
-        labelStatus->setText(str);
-        if(ok==true)
-        {
-            break;
-        }
-        QThread::sleep(1);
-    }
-    QString str="initComPort "+serialPortNum+"success ";
-    labelStatus->setText(str);
+    myserialPort = new MySerialPort();
 }

@@ -109,7 +109,10 @@ private:
     QString tcpServerIPAddress;
     QString tcpServerIPPort;
     QString serialPortNum;
-    MySerialPort m_serialPort;
+    MySerialPort *myserialPort;
+    bool serialPortInitOK;
+    bool useUART;
+    QString mapFileName;
 private:
     // Button events
     inline void onButtonConnectClicked();
@@ -142,6 +145,7 @@ private:
 
 //QObject::connect: No such slot MainWindow::onShapeItemTypeChanged(int) in mainwindow.cpp:283
     void loadInitServerFile();
+    void loadInitComServerFile();
     // Socket events
     void onTcpConnected();
     void onTcpDisconnected();
