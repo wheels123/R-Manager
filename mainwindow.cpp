@@ -1632,7 +1632,7 @@ void MainWindow::timerEvent( QTimerEvent *event )
         }
     }
 
-    if(manager)
+    if(manager&&0)
     {
         if(server)
         {

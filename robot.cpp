@@ -46,6 +46,7 @@ int Robot::insertPathPoint(int robotId,int pathId,RobotPoint point,int maxPointN
     tempPath.curPose.phi=0;
     tempPath.leftSpeed=0;
     tempPath.rightSpeed=0;
+    tempPath.robotControl=1;
     ret_find=findPathIndexById(robotId,pathId,index);
 
     if(ret_find==-1)
@@ -93,6 +94,21 @@ bool Robot::getMainPathPointById(int id ,RobotPoint &p)
         if(id==mainPath.at(i).mainPathId)
         {
             p=mainPath.at(i).point;
+            return true;
+        }
+    }
+    return false;
+
+}
+
+bool Robot::getDestPointById(int id ,RobotPoint &p)
+{
+    RobotPoint point;
+    for(int i=0;i<dest.size();i++)
+    {
+        if(id==dest.at(i).id)
+        {
+            p=dest.at(i).point;
             return true;
         }
     }
@@ -157,6 +173,7 @@ int Robot::insertPathPoint(int robotId,int pathId,int mainPathId,int maxPointNum
     tempPath.curPose.phi=0;
     tempPath.leftSpeed=0;
     tempPath.rightSpeed=0;
+    tempPath.robotControl=1;
     ret_find=findPathIndexById(robotId,pathId,index);
 
     if(ret_find==-1)
@@ -197,13 +214,74 @@ int Robot::insertPathPoint(int robotId,int pathId,int mainPathId,int maxPointNum
 }
 
 
-int Robot::insertRobotState(int robotId,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType)
+int Robot::insertPathPointList(int robotId, int pathId,QVector<int> pointIdList)
+{
+    int maxPointNum=pointIdList.size();
+    int index=-1;
+    RobotPathPoint tempPathPoint;
+    RobotPath tempPath;
+    RobotPoint point;
+    int ret=1;
+    int ret_find=1;
+
+    for(int  i=0;i<maxPointNum;i++)
+    {
+        point.x=0;
+        point.y=0;
+        point.phi=0;
+        int mainPathId=pointIdList.at(i);
+        bool find = getMainPathPointById(mainPathId,point);
+        tempPathPoint.mainPathId=mainPathId;
+        if(find==false)
+        {
+            tempPathPoint.mainPathId=-mainPathId;
+        }
+        else
+        {
+            tempPathPoint.mainPathId=mainPathId;
+        }
+        tempPathPoint.id=i;
+        tempPathPoint.point=point;
+
+        tempPath.point.append(tempPathPoint);
+
+    }
+
+    tempPath.id=pathId;
+    tempPath.num=maxPointNum;
+    tempPath.robotId=robotId;
+    tempPath.pathIdToGo=0;
+    tempPath.robotState=(RobotPath::RobotState)0;
+    tempPath.robotType=(RobotPath::RobotType)0;
+    tempPath.curPose.x=0;
+    tempPath.curPose.y=0;
+    tempPath.curPose.phi=0;
+    tempPath.leftSpeed=0;
+    tempPath.rightSpeed=0;
+    tempPath.robotControl=1;
+    ret_find=findPathIndexById(robotId,pathId,index);
+    if(ret_find==-1)
+    {
+       path.append(tempPath);
+    }
+    else
+    {
+        clearPath(index);
+        RobotPath &m = path[index];
+        m=tempPath;
+    }
+
+    return ret;
+}
+
+
+int Robot::insertRobotState(int robotId,int pathId,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType)
 {
     int index=-1;
     RobotPath tempPath;
 
 
-    tempPath.id=-1;
+    tempPath.id=pathId;
     tempPath.num=0;
     tempPath.robotId=robotId;
     tempPath.pathIdToGo=0;
@@ -1601,6 +1679,32 @@ QVector<RobotPathPoint> RobotPath::getNearPointById()
     }
     return p;
 }
+
+int RobotPath::getPointNumToLastById()
+{
+    int num=0;
+    int startId=0;
+    int endId=point.size()-1;
+    for(int i=0;i<point.size();i++)
+    {
+        if(pathIdToGo==point.at(i).mainPathId)
+        {
+            startId=i-1;
+            endId=i+1;
+            if(i==0)
+            {
+                startId=0;
+            }
+            if(i==point.size()-1)
+            {
+                endId=point.size()-1;
+            }
+            break;
+        }
+    }
+    return point.size()-endId;
+}
+
 
 void Robot::setPathRobotIdById(int id,int robotId)
 {

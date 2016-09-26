@@ -242,6 +242,7 @@ public:
     QVector<RobotPathPoint> getNearPointById();
     QVector<int> getNearPointIdById();
     QVector<int> getNearPointIdById(int id);
+    int getPointNumToLastById();
 };
 
 class RobotMainPath
@@ -304,7 +305,7 @@ public:
     bool erasePathByIndex(int index);
     RobotPath getPathByIndex(int index);
     bool findRobotId(int robotId, int &index);
-    int insertRobotState(int robotId,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType);
+    int insertRobotState(int robotId,int pathId,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType);
     bool insertRobotStateByIndex(int index,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType);
     QString robotStateToString(int index);
 
@@ -338,6 +339,8 @@ public:
      bool checkMovableByIndex(int index);
      QVector<QVector<RobotPathPoint>> getPose();
      void estimateRobotPose();
+     bool getDestPointById(int id ,RobotPoint &p);
+     int insertPathPointList(int robotId,int pathId,QVector<int> pointIdList);
 public:
      void clearDest();
      void insertDest(RobotDestPoint rp);

@@ -414,7 +414,7 @@ void FortuneServer::onUpdateRobotState(QTcpSocket* socket,int robotId,double x,d
     rp.y=y;
     rp.phi=phi;
 
-    int ret = robot.insertRobotState(robotId,rp,left,right,goMainPathId,robotState,robotType);
+    int ret = robot.insertRobotState(robotId,0,rp,left,right,goMainPathId,robotState,robotType);
      //qDebug() <<"insertRobotState ret "<<QString::number(ret,10);
 
     //robot.updateControlNum();

@@ -50,6 +50,7 @@ public:
     bool pointOnSameRoad(int ida,int idb);
     int priorRobot(RobotHighParam pa,RobotHighParam pb);
     RobotHighParam getParamById(int id);
+    void exControl(Robot *robot);
 };
 
 #endif // TWOWAYREGION_H

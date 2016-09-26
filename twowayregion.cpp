@@ -712,6 +712,7 @@ void TwoWayRegion::setControl(Robot *robot)
         }
     }
 
+    exControl(robot);
     for(int i=0;i<control.size();i++)
     {
         if(control.at(i)==0)
@@ -907,3 +908,71 @@ RobotHighParam TwoWayRegion::getParamById(int id)
     return p;
 }
 
+void TwoWayRegion::exControl(Robot *robot)
+{
+
+    for(int m=0;m<robotIn.size();m++)
+    {
+        for(int n=0;n<robotIn.size();n++)
+        {
+            if(n==m) continue;
+            //qDebug() <<"m n"<<QString::number(m,10)<<QString::number(n,10);
+
+            RobotPath rpm = robotIn.at(m);
+            RobotPath rpn = robotIn.at(n);
+            int num= rpm.getPointNumToLastById();
+            QVector<RobotPathPoint> pointList = rpm.getNearPointById();
+            double dis1=10;
+            double dis2=10;
+            RobotPoint dest;
+            dest.x=4.700;
+            dest.y=15.230;
+
+            if(pointList.size()>1)
+            {
+
+                dis1=m_math.dis(rpn.curPose,pointList.at(1).point);
+                //qDebug() <<"dis1 "<<QString::number(rpn.curPose.x,'f',3)<<QString::number(rpn.curPose.y,'f',3)<<QString::number(rpn.curPose.phi,'f',3);
+                //qDebug() <<"dis1 "<<QString::number(pointList.at(1).point.x,'f',3)<<QString::number(pointList.at(1).point.y,'f',3)<<QString::number(pointList.at(1).point.phi,'f',3);
+                //qDebug() <<"dis1 "<<QString::number(rpm.pathIdToGo,10);
+            }
+            if(pointList.size()>2)
+            {
+                if(m_math.dis(dest,pointList.at(1).point)>0.1&&m_math.dis(dest,pointList.at(2).point)>0.1) continue;
+                dis2=m_math.dis(rpn.curPose,pointList.at(2).point);
+                //qDebug() <<"dis2 "<<QString::number(rpn.curPose.x,'f',3)<<QString::number(rpn.curPose.y,'f',3)<<QString::number(rpn.curPose.phi,'f',3);
+                //qDebug() <<"dis2 "<<QString::number(pointList.at(2).point.x,'f',3)<<QString::number(pointList.at(2).point.y,'f',3)<<QString::number(pointList.at(2).point.phi,'f',3);
+                //qDebug() <<"dis2 "<<QString::number(rpm.pathIdToGo,10);
+            }
+
+            //qDebug() <<"exControl "<<QString::number(rpm.robotId,10)<<QString::number(rpn.robotId,10)<<" n"<<QString::number(num,10)<<QString::number(dis1,'f',3)<<QString::number(dis2,'f',3);
+            if(num>2&&pointList.size()>1)
+            {
+                if(dis1<0.4)
+                {
+                    int index = robot->findPathIndexById(rpm.robotId);
+                    if(index!=-1)
+                    {
+                       robot->setRobotControl(index,0);
+                       qDebug() << "stop a robot id "<<QString::number(rpm.robotId,10)<<" pathpoint set by id"<<QString::number(rpn.robotId,10);
+                    }
+                }
+            }
+            else if((num==1||num==2)&&pointList.size()>2)
+            {
+                if(dis1<0.4||dis2<0.4)
+                {
+                    int index = robot->findPathIndexById(rpm.robotId);
+                    if(index!=-1)
+                    {
+                       robot->setRobotControl(index,0);
+                       qDebug() << "stop b robot id "<<QString::number(rpm.robotId,10)<<" pathpoint set by id"<<QString::number(rpn.robotId,10);
+                    }
+                }
+            }
+
+        }
+
+    }
+
+}

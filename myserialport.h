@@ -10,6 +10,7 @@
 #include <QThreadPool>
 #include <qevent.h>
 #include <qwt_point_cus.h>
+#include <QTime>
 class QTimer;
 class QTimerEvent;
 class MySerialPort : public QSerialPort
@@ -30,12 +31,12 @@ signals:
 protected:
     void onUpdateRobotPath(int robotId, int pathId,int pointNum,int pointId,double x,double y,double phi);
     void onUpdateRobotPathByMainPath(int robotId, int pathId,int pointNum,int pointId,int mainPathId);
-    void onUpdateRobotState(int robotId,double x,double y,double phi,double left,double right,int goMainPathId,int robotState,int robotType);
+    void onUpdateRobotState(int robotId,int pathId,double x,double y,double phi,double left,double right,int goMainPathId,int robotState,int robotType);
     void timerEvent( QTimerEvent *event );
     void robotMsg(QString str);
     void onNewPoint(const QwtPointCus point);
     void onUpdateSN(int sn);
-
+    void onUpdateRobotPath(int robotId, int pathId,QVector<int> pointList);
 public:
     inline void processData(QString &data);
     inline void transData(QString &data);
@@ -45,7 +46,7 @@ public:
     int getSerialNumberMax();
     int newSerialNumber();
     int findSerialNumber(int sn);
-    void sendControlCmd(int sn,int cmd);
+    void sendControlCmd(int sn,int cmd,int pathId);
     QVector<RobotPoint> getPose(int n);
     QVector<QVector<RobotPathPoint>> getPose();
 
@@ -64,7 +65,7 @@ private:
     bool m_heart;
     bool m_connected;
     int m_status;
-
+    bool m_sendEnable;
 private slots:
     void readyReadSlot();
 };
