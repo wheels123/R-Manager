@@ -244,8 +244,8 @@ int Robot::insertPathPointList(int robotId, int pathId,QVector<int> pointIdList)
         tempPathPoint.point=point;
 
         tempPath.point.append(tempPathPoint);
-
     }
+
 
     tempPath.id=pathId;
     tempPath.num=maxPointNum;
@@ -279,7 +279,6 @@ int Robot::insertRobotState(int robotId,int pathId,RobotPoint point,double left,
 {
     int index=-1;
     RobotPath tempPath;
-
 
     tempPath.id=pathId;
     tempPath.num=0;

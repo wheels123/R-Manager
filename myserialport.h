@@ -11,6 +11,7 @@
 #include <qevent.h>
 #include <qwt_point_cus.h>
 #include <QTime>
+#include <QTimer>
 class QTimer;
 class QTimerEvent;
 class MySerialPort : public QSerialPort
@@ -57,6 +58,9 @@ public:
 //////////////////////
     void sendUpdateLabel();
     void sendDelelteLabel(int labelNum);
+    unsigned short CRC16(unsigned char *puchMsg,
+    unsigned short usDataLen
+    );
 private:
     //QSerialPort m_serialPort;
     Robot robot;
@@ -66,8 +70,15 @@ private:
     bool m_connected;
     int m_status;
     bool m_sendEnable;
+    QTime m_time;
+    int lastReadTime;
+    int irpTime;
+    bool getLine;
+    QTimer *m_timeSendCtrl;
+
 private slots:
     void readyReadSlot();
+    void timerEventSendCtrl( );
 };
 
 #endif // MYSERIALPORT_H

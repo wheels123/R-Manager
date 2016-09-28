@@ -7,10 +7,10 @@ DialogServer::DialogServer(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QStringList num;
-    num<<QString("1")<<QString("2")<<QString("3")<<QString("4");
-    QStringListModel *model = new QStringListModel(num);
-    ui->listViewClient->setModel(model);
+    //QStringList num;
+    //num<<QString("1")<<QString("2")<<QString("3")<<QString("4");
+    //QStringListModel *model = new QStringListModel(num);
+    //ui->listViewClient->setModel(model);
 
 }
 
