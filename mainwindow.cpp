@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     server=NULL;
     manager=NULL;
     myserialPort=NULL;
+    udpReceiver=NULL;
     serialPortInitOK=false;
     useUART=true;
     loadInitFile();
@@ -46,7 +47,8 @@ MainWindow::MainWindow(QWidget *parent)
     }
     else
     {
-        initTrackServer();
+        //initTrackServer();
+        iniUdpServer();
     }
 
 
@@ -615,6 +617,116 @@ inline void MainWindow::initTrackServer()
 
 
 }
+
+inline void MainWindow::iniUdpServer()
+{
+    const QString ipAddrHead=tcpServerIPAddress;
+
+    udpReceiver = new UdpReceiver(this);
+
+    QString ipAddress;
+    QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
+    QHostAddress selectAddr;
+    // use the first non-localhost IPv4 address
+    labelStatus->setText("wait for ip 31.200");
+    while(1)
+    {
+        for (int i = 0; i < ipAddressesList.size(); ++i) {
+            if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
+                ipAddressesList.at(i).toIPv4Address()) {
+
+                if(ipAddressesList.at(i).toString().indexOf(ipAddrHead)>=0)
+                {
+                    selectAddr = ipAddressesList.at(i);
+                    ipAddress = ipAddressesList.at(i).toString();
+                    break;
+                }
+            }
+        }
+        if (!ipAddress.isEmpty())
+        {
+            bool ok=false;
+            quint16 port=9999;
+            int tPort= tcpServerIPPort.toInt(&ok,10);
+            if(ok)
+            {
+                port=tPort;
+            }
+            // if we did not find one, use IPv4 localhost
+            if (ipAddress.isEmpty())
+                ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
+            labelStatus->setText(tr("The udp server is running on\n\nIP: %1\nport: %2\n\n"
+                                    "Run the Fortune Client example now.")
+                                 .arg(ipAddress).arg(port));
+
+            if (!udpReceiver->init(selectAddr,port)) {
+                labelStatus->setText(tr("Unable to start the udp server:"));
+                QThread::sleep(1);
+            }
+            else
+            {
+              break;
+            }
+        }
+        QThread::sleep(1);
+    }
+    /*
+    quint16 port=9999;
+    // if we did not find one, use IPv4 localhost
+    if (ipAddress.isEmpty())
+        ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
+    labelStatus->setText(tr("The server is running on\n\nIP: %1\nport: %2\n\n"
+                            "Run the Fortune Client example now.")
+                         .arg(ipAddress).arg(port));
+
+    if (!server->listen(selectAddr,port)) {
+       // QMessageBox::critical(this, tr("Threaded Fortune Server"),
+       //                       tr("Unable to start the server: %1.")
+       //                       .arg(server->errorString()));
+        labelStatus->setText(tr("Unable to start the server: %1.")
+                                                    .arg(server->errorString()));
+
+        QThread::sleep(1);
+        close();
+        return;
+    }
+    */
+    loadInitUdpServerFile();
+
+/*
+    connect(server,
+            &FortuneServer::newClientSN,
+            this,
+            &MainWindow::onNewClientSN);
+
+    connect(server,
+            &FortuneServer::newConnection,
+            this,
+            &MainWindow::onNewConnection);
+*/
+    connect(udpReceiver,
+            &UdpReceiver::updataRobotPathServer,
+            this,
+            &MainWindow::onUpdataRobotPathServer);
+
+    connect(udpReceiver,
+            &UdpReceiver::updataRobotPathServerState,
+            this,
+            &MainWindow::onUpdataRobotPathServerState);
+
+    connect(udpReceiver,
+            &UdpReceiver::onNewRobotMsg,
+            this,
+            &MainWindow::onNewRobotMsg);
+/*
+    connect(server,
+            &FortuneServer::newPointServer,
+            this,
+            &MainWindow::onNewPointServer);
+
+*/
+}
+
 //
 // Button event
 //
@@ -1438,6 +1550,42 @@ void MainWindow::loadInitServerFile()
 
 }
 
+void MainWindow::loadInitUdpServerFile()
+{
+    QString fileName;
+    //fileName = "initserver.json";
+    //fileName = "0729  走廊.json";
+    fileName = mapFileName;
+    if(fileName.isEmpty()) {
+        return;
+    }
+    QString message;
+    bool result = trackClient->LoadJsonFile(fileName);
+    if (result) {
+        message = "loadInitTcpServerFile : " + fileName + " loaded";
+        QCurveDataCus *dataPath = trackClient->getPathData();
+        if(dataPath!=NULL&&udpReceiver)
+        {
+            udpReceiver->loadData(dataPath,QwtPointCus::PathPoint);
+        }
+        else
+        {
+            message = "loadInitTcpServerFile : failed to load Path " + fileName;
+        }
+        if(dlgServer&&udpReceiver)
+        {
+            dlgServer->updateTreeViewMainPath(udpReceiver->getRobotHandle());
+        }
+
+    } else {
+        message = "loadInitTcpServerFile : failed to load " + fileName;
+    }
+
+    labelStatus->setText(message);
+
+
+}
+
 void MainWindow::loadInitComServerFile()
 {
     QString fileName;
@@ -1591,6 +1739,11 @@ void MainWindow::timerEvent( QTimerEvent *event )
                 Robot *robot = server->getRobotHandle();
                 dlgServer->updateTreeViewPath(robot);
             }
+            if(udpReceiver)
+            {
+                Robot *robot = udpReceiver->getRobotHandle();
+                dlgServer->updateTreeViewPath(robot);
+            }
             if(myserialPort)
             {
                 Robot *robot = myserialPort->getRobotHandle();
@@ -1632,11 +1785,16 @@ void MainWindow::timerEvent( QTimerEvent *event )
         }
     }
 
-    if(manager&&0)
+    if(manager)
     {
         if(server)
         {
             QVector<QVector<RobotPathPoint>> pose=server->getPose();
+            mainPlotLive->showPose(pose);
+        }
+        if(udpReceiver)
+        {
+            QVector<QVector<RobotPathPoint>> pose=udpReceiver->getPose();
             mainPlotLive->showPose(pose);
         }
         if(myserialPort)
@@ -1650,6 +1808,13 @@ void MainWindow::timerEvent( QTimerEvent *event )
         if(server)
         {
             Robot *robot = server->getRobotHandle();
+            robot->updateControlNum();
+            robot->resetControlValue();
+            manager->setRegion(item,path,robot);
+        }
+        if(udpReceiver)
+        {
+            Robot *robot = udpReceiver->getRobotHandle();
             robot->updateControlNum();
             robot->resetControlValue();
             manager->setRegion(item,path,robot);

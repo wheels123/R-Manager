@@ -218,6 +218,7 @@ public:
     double leftSpeed;
     double rightSpeed;
     int robotControl;//
+    int updateTime;
 ////////////////////
     RobotPath& operator =(RobotPath a)
     {
@@ -235,6 +236,7 @@ public:
         this->leftSpeed=a.leftSpeed;
         this->rightSpeed=a.rightSpeed;
         this->robotControl=a.robotControl;
+        this->updateTime=a.updateTime;
     ////////////////////
         return *this;
     }
@@ -305,8 +307,8 @@ public:
     bool erasePathByIndex(int index);
     RobotPath getPathByIndex(int index);
     bool findRobotId(int robotId, int &index);
-    int insertRobotState(int robotId,int pathId,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType);
-    bool insertRobotStateByIndex(int index,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType);
+    int insertRobotState(int robotId,int pathId,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType,int time);
+    bool insertRobotStateByIndex(int index,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType,int time);
     QString robotStateToString(int index);
 
     double estimateMinDis(RobotPoint a,RobotPoint b);
@@ -340,12 +342,14 @@ public:
      QVector<QVector<RobotPathPoint>> getPose();
      void estimateRobotPose();
      bool getDestPointById(int id ,RobotPoint &p);
-     int insertPathPointList(int robotId,int pathId,QVector<int> pointIdList);
+     int insertPathPointList(int robotId,int pathId,QVector<int> pointIdList,int time);
 public:
      void clearDest();
      void insertDest(RobotDestPoint rp);
      QStringList destToString();
      int getDestNum();
+     int getPathPointTime(int index);
+     bool findRobotPathIndexById(int pathId ,int &index);
 private:
     QVector<RobotPath> path;
     QVector<RobotPathPoint> mainPath;

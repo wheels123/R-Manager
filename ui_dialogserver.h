@@ -35,25 +35,25 @@ public:
     {
         if (DialogServer->objectName().isEmpty())
             DialogServer->setObjectName(QStringLiteral("DialogServer"));
-        DialogServer->resize(1079, 615);
+        DialogServer->resize(1200, 900);
         buttonBox = new QDialogButtonBox(DialogServer);
         buttonBox->setObjectName(QStringLiteral("buttonBox"));
-        buttonBox->setGeometry(QRect(610, 560, 341, 32));
+        buttonBox->setGeometry(QRect(610, 860, 341, 32));
         buttonBox->setOrientation(Qt::Horizontal);
         buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
         listViewClient = new QListView(DialogServer);
         listViewClient->setObjectName(QStringLiteral("listViewClient"));
-        listViewClient->setGeometry(QRect(30, 20, 271, 491));
+        listViewClient->setGeometry(QRect(30, 20, 200, 800));
         treeViewPath = new QTreeView(DialogServer);
         treeViewPath->setObjectName(QStringLiteral("treeViewPath"));
-        treeViewPath->setGeometry(QRect(310, 20, 521, 491));
+        treeViewPath->setGeometry(QRect(250, 20, 680, 800));
         treeViewPath->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         treeViewMainPath = new QTreeView(DialogServer);
         treeViewMainPath->setObjectName(QStringLiteral("treeViewMainPath"));
-        treeViewMainPath->setGeometry(QRect(840, 20, 231, 491));
-        comboBox = new QComboBox(DialogServer);
-        comboBox->setObjectName(QStringLiteral("comboBox"));
-        comboBox->setGeometry(QRect(130, 560, 69, 22));
+        treeViewMainPath->setGeometry(QRect(950, 20, 250, 800));
+        //comboBox = new QComboBox(DialogServer);
+        //comboBox->setObjectName(QStringLiteral("comboBox"));
+        //comboBox->setGeometry(QRect(130, 560, 69, 22));
 
         retranslateUi(DialogServer);
         QObject::connect(buttonBox, SIGNAL(accepted()), DialogServer, SLOT(accept()));

@@ -214,7 +214,7 @@ int Robot::insertPathPoint(int robotId,int pathId,int mainPathId,int maxPointNum
 }
 
 
-int Robot::insertPathPointList(int robotId, int pathId,QVector<int> pointIdList)
+int Robot::insertPathPointList(int robotId, int pathId,QVector<int> pointIdList,int time)
 {
     int maxPointNum=pointIdList.size();
     int index=-1;
@@ -259,6 +259,7 @@ int Robot::insertPathPointList(int robotId, int pathId,QVector<int> pointIdList)
     tempPath.leftSpeed=0;
     tempPath.rightSpeed=0;
     tempPath.robotControl=1;
+    tempPath.updateTime=time;
     ret_find=findPathIndexById(robotId,pathId,index);
     if(ret_find==-1)
     {
@@ -275,7 +276,7 @@ int Robot::insertPathPointList(int robotId, int pathId,QVector<int> pointIdList)
 }
 
 
-int Robot::insertRobotState(int robotId,int pathId,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType)
+int Robot::insertRobotState(int robotId,int pathId,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType,int time)
 {
     int index=-1;
     RobotPath tempPath;
@@ -285,6 +286,7 @@ int Robot::insertRobotState(int robotId,int pathId,RobotPoint point,double left,
     tempPath.robotId=robotId;
     tempPath.pathIdToGo=0;
     tempPath.robotControl=1;//only set first time
+    tempPath.updateTime=time;
     bool ret_find=findRobotId(robotId,index);
     if(ret_find==false)
     {
@@ -295,12 +297,12 @@ int Robot::insertRobotState(int robotId,int pathId,RobotPoint point,double left,
     {
        return -1;
     }
-    bool retInsert = insertRobotStateByIndex(index,point,left,right,goMainPathId,robotState,robotType);
+    bool retInsert = insertRobotStateByIndex(index,point,left,right,goMainPathId,robotState,robotType,time);
     if(retInsert==false) return -2;
     return 1;
 }
 
-bool Robot::insertRobotStateByIndex(int index,RobotPoint point,double left,double right,int goPathIndex,int robotState,int robotType)
+bool Robot::insertRobotStateByIndex(int index,RobotPoint point,double left,double right,int goPathIndex,int robotState,int robotType,int time)
 {
     QMutexLocker locker(&mutex);
     int pathNum=path.size();
@@ -322,6 +324,7 @@ bool Robot::insertRobotStateByIndex(int index,RobotPoint point,double left,doubl
     m.robotType=(RobotPath::RobotType)robotType;
     m.leftSpeed=left;
     m.rightSpeed=right;
+    m.updateTime=time;
     return true;
 }
 
@@ -399,6 +402,26 @@ bool Robot::findRobotId(int robotId, int &index)
      RobotPath rp= path.at(i);
      int rid = rp.robotId;
      if(rid==robotId)
+     {
+         index=i;
+         return true;
+     }
+
+    }
+    return false;
+}
+
+bool Robot::findRobotPathIndexById(int pathId ,int &index)
+{
+    QMutexLocker locker(&mutex);
+    int pathNum=path.size();
+    int i;
+    index=-1;
+    for(i=0;i<pathNum;i++)
+    {
+     RobotPath rp= path.at(i);
+     int pid = rp.pathIdToGo;
+     if(pid==pathId)
      {
          index=i;
          return true;
@@ -539,6 +562,14 @@ QStringList Robot::pathToString(int index)
     {
         QString str;
         RobotPathPoint point= rp.point.at(i);
+        if(point.mainPathId==rp.pathIdToGo)
+        {
+            str.append(">>>>>");
+        }
+        else
+        {
+            str.append(" ");
+        }
         str.append(QString::number(pointNumMax,10));
         str.append(" ");
         str.append(QString::number(i,10));
@@ -589,6 +620,15 @@ int Robot::getPathNum()
     return  path.size();
 }
 
+int Robot::getPathPointTime(int index)
+{
+    QMutexLocker locker(&mutex);
+    int pathNum=path.size();
+    if(index<0||index>=pathNum) return 0;
+    RobotPath rp= path.at(index);
+    int pointNum=rp.updateTime;
+    return pointNum;
+}
 
 int Robot::getPathPointNum(int index)
 {

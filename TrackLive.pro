@@ -39,7 +39,8 @@ SOURCES += main.cpp\
     twowayregion.cpp \
     onewayregion.cpp \
     robotmath.cpp \
-    myserialport.cpp
+    myserialport.cpp \
+    udpreceiver.cpp
 
 HEADERS  += mainwindow.h \
         qmainplot.h \
@@ -60,7 +61,8 @@ HEADERS  += mainwindow.h \
     twowayregion.h \
     onewayregion.h \
     robotmath.h \
-    myserialport.h
+    myserialport.h \
+    udpreceiver.h
 
 FORMS += \
     dialogoutputoption.ui \

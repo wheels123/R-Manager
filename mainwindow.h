@@ -24,6 +24,7 @@
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include "myserialport.h"
+#include "udpreceiver.h"
 class QwtPointCus;
 class QCurveDataCus;
 class DialogOutputOption;
@@ -47,6 +48,7 @@ private:
     inline void initStatusBar();
     inline void initTrackClient();
     inline void initTrackServer();
+    inline void iniUdpServer();
     inline void initManager();
     inline QWidget *initToolBarDrawing(QToolBar *toolBar);
     inline QWidget *initToolBarPoint(QToolBar *toolBar);
@@ -113,6 +115,8 @@ private:
     bool serialPortInitOK;
     bool useUART;
     QString mapFileName;
+
+    UdpReceiver *udpReceiver;
 private:
     // Button events
     inline void onButtonConnectClicked();
@@ -145,6 +149,7 @@ private:
 
 //QObject::connect: No such slot MainWindow::onShapeItemTypeChanged(int) in mainwindow.cpp:283
     void loadInitServerFile();
+    void loadInitUdpServerFile();
     void loadInitComServerFile();
     // Socket events
     void onTcpConnected();

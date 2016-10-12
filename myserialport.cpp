@@ -4,7 +4,7 @@ MySerialPort::MySerialPort(QObject *parent ):
     QSerialPort(parent)
 {
     m_nTimerId=0;
-    irpTime=200;
+    irpTime=500;
     //m_nTimerId = startTimer(irpTime);
 
     m_sendEnable=false;
@@ -47,7 +47,7 @@ bool MySerialPort::init(QString port)
     if(open(QIODevice::ReadWrite))
     {
         qDebug() << "m_reader.open(QIODevice::ReadWrite)";
-        setBaudRate(QSerialPort::Baud19200);
+        setBaudRate(QSerialPort::Baud57600);
         setParity(QSerialPort::NoParity);
         setDataBits(QSerialPort::Data8);
         setStopBits(QSerialPort::OneStop);
@@ -202,7 +202,7 @@ inline void MySerialPort::transData(QString &data)
         int pathId = splitData.at(++atId).toInt(&ret,10);if(ret==false){qDebug() << "trans path error data["<<data<<"] at["<<QString::number(atId, 10)<<"]";return;}
         int pointNum = splitData.at(++atId).toInt(&ret,10);if(ret==false){qDebug() << "trans path error data["<<data<<"] at["<<QString::number(atId, 10)<<"]";return;}
 
-        if(pointNum>0&&pointNum+5==itemNo)
+        if(pointNum>=0&&pointNum+5==itemNo)
         {
             QVector<int> path;
             for(int i=0;i<pointNum;i++)
@@ -321,12 +321,12 @@ inline void MySerialPort::transData(QString &data)
                 break;
             }
         }
-        qDebug()<<"get path Q len "<<n;
+        qDebug()<<"get robot state len "<<n;
         unsigned short crc16=CRC16((unsigned char *)ch,n);
 
         if(crc == crc16)
         {
-            qDebug()<<"get robot state date size "<<QString::number(dataSize,10)<<" crc16 "<<QString::number(crc16,16);
+            qDebug()<<"get robot state data size "<<QString::number(dataSize,10)<<" crc16 "<<QString::number(crc16,16);
             onUpdateRobotState(robotId,pathId,x, y,p,left,right,goMainPathId,robotState,robotType);
         }
         else
@@ -407,7 +407,7 @@ inline void MySerialPort::transData(QString &data)
      rp.y=y;
      rp.phi=phi;
 
-     int ret = robot.insertRobotState(robotId,10,rp,left,right,goMainPathId,robotState,robotType);
+     int ret = robot.insertRobotState(robotId,10,rp,left,right,goMainPathId,robotState,robotType,m_time.elapsed());
 
      emit updataRobotPathServerState(&robot);
 
@@ -416,7 +416,7 @@ inline void MySerialPort::transData(QString &data)
 
  void MySerialPort::onUpdateRobotPath(int robotId,int pathId,QVector<int> pointList)
  {
-     int ret = robot.insertPathPointList(robotId,pathId,pointList);
+     int ret = robot.insertPathPointList(robotId,pathId,pointList,m_time.elapsed());
 
      emit updataRobotPathServerState(&robot);
 
@@ -427,6 +427,7 @@ inline void MySerialPort::transData(QString &data)
  {
      static int cnt=0;
      static bool addTimeNext=false;
+     return;
      if(cnt<robot.getPathNum())
      {
          int curTime=m_time.elapsed();
@@ -537,7 +538,7 @@ inline void MySerialPort::transData(QString &data)
       rp.x=0;
       rp.y=0;
       rp.phi=0;
-      int ret = robot.insertRobotState(sn,10,rp,0,0,0,0,0);
+      int ret = robot.insertRobotState(sn,10,rp,0,0,0,0,0,m_time.elapsed());
       emit updataRobotPathServerState(&robot);
       emit onNewRobotMsg(robot.getMsg());
       sendSNOK(sn);
@@ -567,15 +568,25 @@ inline void MySerialPort::transData(QString &data)
       static int addTimeNext=0;
       if(cnt<robot.getPathNum())
       {
+
           int curTime=m_time.elapsed();
-          if(curTime-lastReadTime>100 || getLine==true || addTimeNext>=5)//no more continue date or already read one line
+
+          if(curTime-lastReadTime>150 || getLine==true || addTimeNext>=5)//no more continue date or already read one line
           {
               int sn = robot.getPathRobotIdByIndex(cnt);
               RobotPath rp;
               bool ret = robot.getPathById(sn,rp);
               if(sn>=ROBOT_SN_MIN&&ret)
               {
-                 sendControlCmd(sn,robot.getRobotControl(cnt),rp.id);
+                 if(curTime-rp.updateTime>5000)  //no connection  delete robot
+                 {
+                    robot.deletePath(sn);
+                    cnt--;
+                 }
+                 else
+                 {
+                    sendControlCmd(sn,robot.getRobotControl(cnt),rp.id);
+                 }
                  //sendControlCmd(sn,robot.getRobotControl(cnt),rp.id);
                  getLine=false;
               }
