@@ -1153,7 +1153,7 @@ void QMainPlot::showPose(QVector<QVector<RobotPathPoint>> vvrp)
 
         directPainter->drawSeries(curveCus, 0, dataCus->size()-1);
         curveCus->setSamples(curveCus->data());
-        curveCus->attach( this );
+        //curveCus->attach( this );
     }
 
 

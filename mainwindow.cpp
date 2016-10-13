@@ -1784,20 +1784,20 @@ void MainWindow::timerEvent( QTimerEvent *event )
             }
         }
     }
-
+    //return;
     if(manager)
     {
-        if(server)
+        if(0&&server)
         {
             QVector<QVector<RobotPathPoint>> pose=server->getPose();
             mainPlotLive->showPose(pose);
         }
         if(udpReceiver)
         {
-            QVector<QVector<RobotPathPoint>> pose=udpReceiver->getPose();
-            mainPlotLive->showPose(pose);
+            //QVector<QVector<RobotPathPoint>> pose=udpReceiver->getPose();
+            //mainPlotLive->showPose(pose);
         }
-        if(myserialPort)
+        if(0&&myserialPort)
         {
             QVector<QVector<RobotPathPoint>> pose=myserialPort->getPose();
             mainPlotLive->showPose(pose);
@@ -1805,7 +1805,7 @@ void MainWindow::timerEvent( QTimerEvent *event )
         //qDebug()<<"manager ";
         QCurveDataCus* path = mainPlotLive->getPathData();
         QVector<EditShapeItem *> item = mainPlotLive->getShapeItemData();
-        if(server)
+        if(0&&server)
         {
             Robot *robot = server->getRobotHandle();
             robot->updateControlNum();
@@ -1819,7 +1819,7 @@ void MainWindow::timerEvent( QTimerEvent *event )
             robot->resetControlValue();
             manager->setRegion(item,path,robot);
         }
-        if(myserialPort)
+        if(0&&myserialPort)
         {
             Robot *robot = myserialPort->getRobotHandle();
             robot->updateControlNum();
