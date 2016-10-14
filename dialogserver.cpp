@@ -65,7 +65,7 @@ DialogServer::~DialogServer()
     ui->treeViewPath->setModel(qstmodel);
     ui->treeViewPath->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeViewPath->setAutoFillBackground(true);
-    ui->treeViewPath->expandAll();
+    //ui->treeViewPath->expandAll();
     if(oldmodel)
     {
         int a=oldmodel->columnCount();

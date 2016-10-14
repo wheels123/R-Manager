@@ -47,14 +47,17 @@ bool UdpReceiver::init( QHostAddress &address, quint16 port)
 void UdpReceiver::processPendingDatagrams()
 {
     lastReadTime=m_time.elapsed();
+
     while (udpSocket->hasPendingDatagrams()) {
         QByteArray datagram;
+        //int num = udpSocket->pendingDatagramSize();
+
         datagram.resize(udpSocket->pendingDatagramSize());
         QHostAddress address;
         quint16 port=0;
         udpSocket->readDatagram(datagram.data(), datagram.size(),&address,&port);
 
-        qDebug()<<"udp "<<datagram.data()<<address.toString()<<QString::number(port,10);
+        //qDebug()<<"udp "<<datagram.data()<<address.toString()<<QString::number(port,10);
 
         QString s;
         s.prepend(datagram);
@@ -205,17 +208,6 @@ Robot* UdpReceiver::getRobotHandle()
             *curData=str;
          }
      }
-/*
-     for(int i=0;i<list.size();i++)
-     {
-         QString str = list.at(i);
-         int size=str.size();
-         if(size>0)
-         {
-             transData(str,address);
-         }
-     }
-     */
  }
 
  inline void UdpReceiver::transData(QString &data,QHostAddress &address)
@@ -338,12 +330,12 @@ Robot* UdpReceiver::getRobotHandle()
                      break;
                  }
              }
-             qDebug()<<"get path Q len "<<n;
+             //qDebug()<<"get path Q len "<<n;
              unsigned short crc16=CRC16((unsigned char *)ch,n);
 
              if(crc == crc16)
              {
-                 qDebug()<<"get path Q date size "<<QString::number(dataSize,10)<<" crc16 "<<QString::number(crc16,16);
+                 //qDebug()<<"get path Q date size "<<QString::number(dataSize,10)<<" crc16 "<<QString::number(crc16,16);
                  onUpdateRobotPath( address,robotId,pathId,path);
              }
              else
@@ -426,12 +418,12 @@ Robot* UdpReceiver::getRobotHandle()
                  break;
              }
          }
-         qDebug()<<"get robot state len "<<n;
+         //qDebug()<<"get robot state len "<<n;
          unsigned short crc16=CRC16((unsigned char *)ch,n);
 
          if(crc == crc16)
          {
-             qDebug()<<"get robot state data size "<<QString::number(dataSize,10)<<" crc16 "<<QString::number(crc16,16);
+             //qDebug()<<"get robot state data size "<<QString::number(dataSize,10)<<" crc16 "<<QString::number(crc16,16);
              onUpdateRobotState(address,robotId,pathId,x, y,p,left,right,goMainPathId,robotState,robotType);
          }
          else
