@@ -349,33 +349,7 @@ void QMainPlot::addReceiveDataToLoadData(bool useLabelId)
     curveLoad->setSamples( nDataCus );
     curveLoad->attach( this );
 }
-/*
-inline void QwtPointCus::deleteNet( int net )
-{
-    int i,j,delId=-1;
-    for( i=0;i<SIZE;)
-    {
-        if(d_net[i]==net)
-        {
-            d_net[i]=0;
-            delId=i;
-            for( j=i;j<SIZE-1;j++)
-            {
-                d_net[j]=d_net[j+1];
-            }
-            if(delId!=-1&&delId<d_netId&&d_netId>0)
-            {
-                d_netId-=1;
-            }
-        }
-        else
-        {
-            i++;
-        }
-    }
 
-}
-*/
 void QMainPlot::autoConnect(double autoConnectDisMin,double autoConnectDisMax)
 {
 
@@ -383,93 +357,6 @@ void QMainPlot::autoConnect(double autoConnectDisMin,double autoConnectDisMax)
     int loadPointNum=curveLoad->dataSize();
 
     QCurveDataCus *nDataCus = static_cast<QCurveDataCus *>(curveLoad->data());
-
-    /*
-    int SIZE=10;
-    int d_net[10];
-    int i,j,delId=-1;
-    int net = 260;
-    d_net[0]=270;
-    d_net[1]=202;
-    d_net[2]=272;
-    d_net[3]=288;
-    d_net[4]=274;
-    d_net[5]=276;
-    d_net[6]=269;
-    d_net[7]=1234;
-    d_net[8]=260;
-    d_net[9]=260;
-    int d_netId=0;
-
-
-    for( i=0;i<SIZE;)
-    {
-        if(d_net[i]==net)
-        {
-            d_net[i]=0;
-            delId=i;
-            for( j=i;j<SIZE-1;j++)
-            {
-                d_net[j]=d_net[j+1];
-            }
-            d_net[SIZE-1]=0;
-            if(delId!=-1&&delId<d_netId&&d_netId>0)
-            {
-                d_netId-=1;
-            }
-        }
-        else
-        {
-            i++;
-        }
-    }
-*/
-
-    /*
-    for(int i=0;i<loadPointNum;i++)
-    {
-        for(int j=i+1;j<loadPointNum;j++)
-        {
-            QwtPointCus pointi=nDataCus->sample(i);
-            QwtPointCus pointj=nDataCus->sample(j);
-
-            double xDelta = pointi.x()-pointj.x();
-            double yDelta = pointi.y()-pointj.y();
-            double dis=sqrt(xDelta*xDelta+yDelta*yDelta);
-            if(dis>=autoConnectDisMin&&dis<=autoConnectDisMax)
-            {
-                pointi.insertNet(pointj.id());
-                pointj.insertNet(pointi.id());
-                nDataCus->set(i,pointi);
-                nDataCus->set(j,pointj);
-            }
-        }
-    }
-
-    for(int i=0;i<loadPointNum;i++)
-    {
-        for(int j=0;j<loadPointNum;j++)
-        {
-            QwtPointCus pointi=nDataCus->sample(i);
-            QwtPointCus pointj=nDataCus->sample(j);
-
-            double xDelta = pointi.x()-pointj.x();
-            double yDelta = pointi.y()-pointj.y();
-            double dis=sqrt(xDelta*xDelta+yDelta*yDelta);
-            if(dis>=autoConnectDisMin&&dis<=autoConnectDisMax)
-            {
-
-            }
-            else
-            {
-                pointi.deleteNet(pointj.id());
-                pointj.deleteNet(pointi.id());
-                nDataCus->set(i,pointi);
-                nDataCus->set(j,pointj);
-            }
-        }
-    }
-*/
 
     for(int i=0;i<loadPointNum;i++)
     {
@@ -510,7 +397,59 @@ void QMainPlot::autoConnect(double autoConnectDisMin,double autoConnectDisMax)
     plotCanvas->setPaintAttribute( QwtPlotCanvas::ImmediatePaint, false );
 }
 
-//void QMainPlot::appendPoint(curveId id, const QPointF &point,const double angleValue,const int tagNo)
+//RobotPoint avoidMoveVector(RobotPoint rp, RobotPoint op,double r);
+//RobotPoint vectorAdd(RobotPoint pa, RobotPoint pb);
+
+void QMainPlot::autoAvoidNormalPoint(double autoMoveDisMax)
+{
+    QCurveDataCus *pDataCus = static_cast<QCurveDataCus *>(CurvePath->data());
+    QCurveDataCus *nDataCus = static_cast<QCurveDataCus *>(CurveNormal->data());
+    double R=autoMoveDisMax;
+    for(int i=0;i<CurvePath->dataSize();i++)
+    {
+        QwtPointCus pointi=pDataCus->sample(i);
+        RobotPoint rpi(pointi.x(),pointi.y());
+        RobotPoint moveVectorAll(0,0,0);
+        for(int j=0;j<CurveNormal->dataSize();j++)
+        {
+            QwtPointCus pointj=nDataCus->sample(j);
+            RobotPoint rpj(pointj.x(),pointj.y());
+            RobotPoint moveVector = m_math.avoidMoveVector(rpi,rpj,R);
+            moveVectorAll=m_math.vectorAdd(moveVectorAll,moveVector);
+        }
+
+        double maxDisMove=0;
+        for(int j=0;j<CurveNormal->dataSize();j++)
+        {
+            QwtPointCus pointj=nDataCus->sample(j);
+            RobotPoint rpj(pointj.x(),pointj.y());
+            double dis = m_math.avoidMoveVectorDis(rpi,rpj,moveVectorAll,R);
+            if(maxDisMove<dis)
+            {
+                maxDisMove = dis;
+            }
+        }
+
+        if(maxDisMove<0.5)
+        {
+           RobotPoint newPoint = m_math.avoidNewPoint(rpi,moveVectorAll.phi,maxDisMove);
+           pointi.setX(newPoint.x);
+           pointi.setY(newPoint.y);
+           pDataCus->set(i,pointi);
+        }
+    }
+
+    CurvePath->setSamples( pDataCus );
+    //curveLoad->attach( this );//  可能需要去掉
+
+    QwtPlotCanvas *plotCanvas =
+        qobject_cast<QwtPlotCanvas *>( canvas() );
+
+    plotCanvas->setPaintAttribute( QwtPlotCanvas::ImmediatePaint, true );
+    replot();
+    plotCanvas->setPaintAttribute( QwtPlotCanvas::ImmediatePaint, false );
+}
+
 void QMainPlot::appendPoint(QwtPointCus dataAppend)
 {
      qDebug()<<"QMainPlot appendPoint";
@@ -1082,13 +1021,18 @@ void QMainPlot::showPose(QVector<QVector<RobotPathPoint>> vvrp)
                                            Qt::NoBrush,
                                            QPen(c),
                                            QSize(5, 5)));
+            ///////
+            if (!curveCus->isVisible()) {
+                curveCus->setVisible(true);
+            }
+            curveCus->setSamples(curveCus->data());
             curveCus->attach(this);
+            //////
             vectorCurvePose.append(curveCus);
         }
     }
 
     QPointF point;
-
     //if(vectorCurvePose.size()!=vvrp.size()) return;
     for(int i=0;i<vectorCurvePose.size();i++)
     {
@@ -1121,43 +1065,7 @@ void QMainPlot::showPose(QVector<QVector<RobotPathPoint>> vvrp)
             dataCus->clear();
         }
 
-
-        if (!curveCus->isVisible()) {
-            curveCus->setVisible(true);
-        }
-        const bool doClip = !canvas()->testAttribute(Qt::WA_PaintOnScreen);
-        if (doClip)
-        {
-            /*
-               Depending on the platform setting a clip might be an important
-               performance issue. F.e. for Qt Embedded this reduces the
-               part of the backing store that has to be copied out - maybe
-               to an unaccelerated frame buffer device.
-             */
-            const QwtScaleMap xMap = canvasMap(curveCus->xAxis());
-            const QwtScaleMap yMap = canvasMap(curveCus->yAxis());
-
-            QRegion clipRegion;
-
-            const QSize symbolSize = curveCus->symbol()->size();
-            QRect r(0, 0, symbolSize.width() + 2, symbolSize.height() + 2);
-
-            const QPointF center =
-                    QwtScaleMap::transform(xMap, yMap, point);
-            r.moveCenter(center.toPoint());
-
-            clipRegion += r;
-
-            directPainter->setClipRegion(clipRegion);
-        }
-
-        directPainter->drawSeries(curveCus, 0, dataCus->size()-1);
-        curveCus->setSamples(curveCus->data());
-        //curveCus->attach( this );
     }
-
-
-
     QwtPlotCanvas *plotCanvas =
         qobject_cast<QwtPlotCanvas *>( canvas() );
 
@@ -1550,6 +1458,5 @@ void QMainPlot::highLightShapeItem(QPointF p)
     replot();
     plotCanvas->setPaintAttribute( QwtPlotCanvas::ImmediatePaint, false );
 
-
-
 }
+

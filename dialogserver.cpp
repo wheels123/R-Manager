@@ -39,6 +39,8 @@ DialogServer::~DialogServer()
         QString pathname;
         pathname.append("P ");
         pathname.append(QString::number(i,10));
+        pathname.append(" IP ");
+        pathname.append(robot->getPathIpByIndex(i).toString());
         pathname.append(" RID ");
         pathname.append(QString::number(robot->getPathRobotIdByIndex(i),10));
         pathname.append(" ID ");
@@ -66,6 +68,7 @@ DialogServer::~DialogServer()
     ui->treeViewPath->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeViewPath->setAutoFillBackground(true);
     //ui->treeViewPath->expandAll();
+    //ui->treeViewPath->expandToDepth(5);
     if(oldmodel)
     {
         int a=oldmodel->columnCount();

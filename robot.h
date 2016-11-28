@@ -3,6 +3,7 @@
 #include <QVector>
 #include "qcurvedatacus.h"
 #include <qmutex.h>
+#include "qHostAddress.h"
 class QwtPointCus;
 class QCurveDataCus;
 class RobotPoint
@@ -204,6 +205,7 @@ class RobotPath
 public:
     enum RobotState{AtStartPoint=0,AtDestPoint,GoToDestPoint,GoToStartPoint};
     enum RobotType{Guide=0,Waiter};
+    QHostAddress ip;
 //robot id
     int robotId;
 //path
@@ -282,8 +284,8 @@ public:
 
 #define PI_M_2 (M_PI/2)
     Robot();
-    int insertPathPoint(int robotId,int pathId,RobotPoint point,int maxPointNum,int pointId);
-    int insertPathPoint(int robotId,int pathId,int mainPathId,int maxPointNum,int pointId);
+    int insertPathPoint(QHostAddress address,int robotId,int pathId,RobotPoint point,int maxPointNum,int pointId);
+    int insertPathPoint(QHostAddress address,int robotId,int pathId,int mainPathId,int maxPointNum,int pointId);
     //QVector<RobotPath> *getPathVector();
     int getPathNum();
     int getPathPointNum(int index);
@@ -307,7 +309,7 @@ public:
     bool erasePathByIndex(int index);
     RobotPath getPathByIndex(int index);
     bool findRobotId(int robotId, int &index);
-    int insertRobotState(int robotId,int pathId,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType,int time);
+    int insertRobotState(QHostAddress address,int robotId,int pathId,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType,int time);
     bool insertRobotStateByIndex(int index,RobotPoint point,double left,double right,int goMainPathId,int robotState,int robotType,int time);
     QString robotStateToString(int index);
 
@@ -342,7 +344,8 @@ public:
      QVector<QVector<RobotPathPoint>> getPose();
      void estimateRobotPose();
      bool getDestPointById(int id ,RobotPoint &p);
-     int insertPathPointList(int robotId,int pathId,QVector<int> pointIdList,int time);
+     int insertPathPointList(QHostAddress address,int robotId,int pathId,QVector<int> pointIdList,int time);
+     bool findIpByRobotId(int robotId, QHostAddress &address);
 public:
      void clearDest();
      void insertDest(RobotDestPoint rp);
@@ -350,6 +353,8 @@ public:
      int getDestNum();
      int getPathPointTime(int index);
      bool findRobotPathIndexById(int pathId ,int &index);
+     int getPathToGoIndex(int index);
+     QHostAddress getPathIpByIndex(int index);
 private:
     QVector<RobotPath> path;
     QVector<RobotPathPoint> mainPath;

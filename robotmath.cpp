@@ -254,3 +254,128 @@ double RobotMath::estimateMinDisA2B(RobotPoint a,double la,double ra,RobotPoint 
     //qDebug() << "min_dis"<<QString::number(min_dis,'f',3);
     return min_dis;
 }
+
+double RobotMath::calcuLineRad(RobotPoint destPose2D, RobotPoint curPose2D)
+{
+    double x,y;
+    double ang=0;
+    x=destPose2D.x-curPose2D.x;
+    y=destPose2D.y-curPose2D.y;
+    if(y==0)
+    {
+        if(x>=0) ang=0;
+        else ang=M_PI;
+    }
+    else if(y>0)
+    {
+        if(x==0) ang=M_PI/2;
+        else if(x>0) ang=atan(y/x);
+        else ang=M_PI-atan(-y/x);
+    }
+    else
+    {
+        if(x==0) ang=-M_PI/2;
+        else if(x>0) ang=-atan(-y/x);
+        else ang=atan(y/x)-M_PI;
+    }
+    return ang;
+}
+
+RobotPoint RobotMath::avoidMoveVector(RobotPoint rp, RobotPoint op,double r)
+{
+    RobotPoint result;
+
+    double rpx=rp.x;
+    double rpy=rp.y;
+    double opx=op.x;
+    double opy=op.y;
+
+    double dis=sqrt((rpx-opx)*(rpx-opx)+(rpy-opy)*(rpy-opy));
+    if(dis>=r)
+    {
+        result.x=0;
+        result.y=0;
+        result.phi=0;
+        return result;
+    }
+    result.phi = calcuLineRad(rp,op);
+    double moveDis=r-dis;
+    result.x=moveDis*cos(result.phi);
+    result.y=moveDis*sin(result.phi);
+
+    return result;
+}
+
+RobotPoint RobotMath::vectorAdd(RobotPoint pa, RobotPoint pb)
+{
+    RobotPoint result;
+
+    double pax=pa.x;
+    double pay=pa.y;
+    double pbx=pb.x;
+    double pby=pb.y;
+
+    result.x=pax+pbx;
+    result.y=pay+pby;
+
+    RobotPoint origin(0,0,0);
+    result.phi = calcuLineRad(result,origin);
+    return result;
+}
+
+double RobotMath::calcuAbsRad(double rad1,double rad2)
+{
+    double dRad;
+
+    dRad = rad2 - rad1;
+    if(dRad > M_PI) {
+    return M_PI*2 - dRad;
+  } else if (dRad < -M_PI) {
+        return M_PI*2 + dRad;
+    } else {
+    return fabs (dRad);
+  }
+
+}
+
+double RobotMath::avoidMoveVectorDis(RobotPoint rp, RobotPoint op,RobotPoint sp,double r)
+{
+    RobotPoint result;
+    double rpx=rp.x;
+    double rpy=rp.y;
+    double opx=op.x;
+    double opy=op.y;
+    double dis=sqrt((rpx-opx)*(rpx-opx)+(rpy-opy)*(rpy-opy));
+    if(dis>=r)
+    {
+        result.x=0;
+        result.y=0;
+        result.phi=0;
+        return 0;
+    }
+    result.phi = calcuLineRad(rp,op);
+    double moveDis=r-dis;
+    double rad = calcuAbsRad(result.phi,sp.phi);
+    double minDis;
+    minDis=moveDis/cos(rad);
+    return minDis;
+}
+
+
+RobotPoint RobotMath::avoidNewPoint(RobotPoint p, double phi,double dis)
+{
+    RobotPoint result;
+    RobotPoint off(dis,0,0);
+    p.phi=phi;
+    result = TPose2D_Add(p,off);
+    return result;
+}
+
+RobotPoint RobotMath::TPose2D_Add(const RobotPoint a,const RobotPoint b)
+{
+    RobotPoint ret;
+    ret.x =	a.x + b.x * cos(a.phi) - b.y * sin(a.phi);
+    ret.y = a.y + b.x * sin(a.phi) + b.y * cos(a.phi);
+    ret.phi = a.phi + b.phi;
+    return ret;
+}

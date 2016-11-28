@@ -15,6 +15,7 @@
 #include <qwt_plot_shapeitem.h>
 #include <shapefactory.h>
 #include "editshapeitem.h"
+#include "robotmath.h"
 class QCurveDataCus;
 class QwtPlotMarker;
 class QwtPointCus;
@@ -147,6 +148,7 @@ public:
     void highLightShapeItem(QPointF p);
     void loadData_t(QCurveDataCus *data);
     void showPose(QVector<QVector<RobotPathPoint>> vvrp);
+    void autoAvoidNormalPoint(double autoMoveDisMax);
 private slots:
     void onLegendChecked(const QVariant &itemInfo, bool on, int index);
 
@@ -170,12 +172,14 @@ private:
     int pointNum;
     bool markerShow[10];
     QVector<QwtPlotCurve *> vectorCurvePose;
+    QVector<QwtPlotCurveCus *> vectorCurveCusPose;
     QHash<QPointF, QwtPlotShapeItem *> mapCover;
 
     EditShapeItem * shapeItem;
     QVector<EditShapeItem *> shapeItemList;
 
     QwtPlotCurve * CurveNormal_t;
+    RobotMath m_math;
 };
 
 #endif // QMAINPLOT_H

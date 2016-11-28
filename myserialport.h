@@ -12,6 +12,7 @@
 #include <qwt_point_cus.h>
 #include <QTime>
 #include <QTimer>
+#include "qHostAddress.h"
 class QTimer;
 class QTimerEvent;
 class MySerialPort : public QSerialPort

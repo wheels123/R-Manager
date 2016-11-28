@@ -46,7 +46,7 @@ public:
         listViewClient->setGeometry(QRect(30, 20, 200, 800));
         treeViewPath = new QTreeView(DialogServer);
         treeViewPath->setObjectName(QStringLiteral("treeViewPath"));
-        treeViewPath->setGeometry(QRect(250, 20, 680, 800));
+        treeViewPath->setGeometry(QRect(30, 20, 900, 800));
         treeViewPath->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         treeViewMainPath = new QTreeView(DialogServer);
         treeViewMainPath->setObjectName(QStringLiteral("treeViewMainPath"));

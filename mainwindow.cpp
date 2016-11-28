@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     myserialPort=NULL;
     udpReceiver=NULL;
     serialPortInitOK=false;
+    udpServerInitOK=false;
     useUART=true;
     loadInitFile();
 
@@ -48,12 +49,8 @@ MainWindow::MainWindow(QWidget *parent)
     else
     {
         //initTrackServer();
-        iniUdpServer();
+        initUpdServerS();
     }
-
-
-
-
 }
 
 MainWindow::~MainWindow()
@@ -129,6 +126,11 @@ inline QWidget *MainWindow::initToolBarDrawing(QToolBar *toolBar)
     connect(pushButtonAutoConnect, &QPushButton::clicked,
             this, &MainWindow::onPushButtonAutoConnectClicked);
 
+    pushButtonAutoAdjust = new QPushButton("&自动调整", hBoxWidget);
+    pushButtonAutoAdjust->setCheckable(true);
+
+    connect(pushButtonAutoAdjust, &QPushButton::clicked,
+            this, &MainWindow::onPushButtonAutoAdjustClicked);
 
     pushButtonDownLoad = new QPushButton("&下载路线", hBoxWidget);
     pushButtonDownLoad->setCheckable(true);
@@ -186,6 +188,7 @@ inline QWidget *MainWindow::initToolBarDrawing(QToolBar *toolBar)
     hBoxLayout->addWidget(labelC);
     hBoxLayout->addWidget(lineEditAutoConnectDisMax);
     hBoxLayout->addWidget(pushButtonAutoConnect);
+    hBoxLayout->addWidget(pushButtonAutoAdjust);
     hBoxLayout->addWidget(pushButtonDownLoad);
     hBoxLayout->addWidget(pushButtonOutputOption);
     hBoxLayout->addWidget(pushButtonServer);
@@ -618,7 +621,7 @@ inline void MainWindow::initTrackServer()
 
 }
 
-inline void MainWindow::iniUdpServer()
+inline void MainWindow::initUdpServer()
 {
     const QString ipAddrHead=tcpServerIPAddress;
 
@@ -655,8 +658,7 @@ inline void MainWindow::iniUdpServer()
             // if we did not find one, use IPv4 localhost
             if (ipAddress.isEmpty())
                 ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
-            labelStatus->setText(tr("The udp server is running on\n\nIP: %1\nport: %2\n\n"
-                                    "Run the Fortune Client example now.")
+            labelStatus->setText(tr("The udp server is running on\n\nIP: %1\nport: %2\n\n")
                                  .arg(ipAddress).arg(port));
 
             if (!udpReceiver->init(selectAddr,port)) {
@@ -670,40 +672,10 @@ inline void MainWindow::iniUdpServer()
         }
         QThread::sleep(1);
     }
-    /*
-    quint16 port=9999;
-    // if we did not find one, use IPv4 localhost
-    if (ipAddress.isEmpty())
-        ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
-    labelStatus->setText(tr("The server is running on\n\nIP: %1\nport: %2\n\n"
-                            "Run the Fortune Client example now.")
-                         .arg(ipAddress).arg(port));
 
-    if (!server->listen(selectAddr,port)) {
-       // QMessageBox::critical(this, tr("Threaded Fortune Server"),
-       //                       tr("Unable to start the server: %1.")
-       //                       .arg(server->errorString()));
-        labelStatus->setText(tr("Unable to start the server: %1.")
-                                                    .arg(server->errorString()));
-
-        QThread::sleep(1);
-        close();
-        return;
-    }
-    */
     loadInitUdpServerFile();
 
-/*
-    connect(server,
-            &FortuneServer::newClientSN,
-            this,
-            &MainWindow::onNewClientSN);
 
-    connect(server,
-            &FortuneServer::newConnection,
-            this,
-            &MainWindow::onNewConnection);
-*/
     connect(udpReceiver,
             &UdpReceiver::updataRobotPathServer,
             this,
@@ -718,15 +690,105 @@ inline void MainWindow::iniUdpServer()
             &UdpReceiver::onNewRobotMsg,
             this,
             &MainWindow::onNewRobotMsg);
-/*
-    connect(server,
-            &FortuneServer::newPointServer,
+
+    connect(udpReceiver,
+            &UdpReceiver::newPointServer,
             this,
             &MainWindow::onNewPointServer);
 
-*/
+
 }
 
+
+inline void MainWindow::initUpdServerS()
+{
+    if(udpReceiver==NULL)
+    {
+        udpReceiver = new UdpReceiver(this);
+    }
+}
+
+inline bool MainWindow::initUdpServerInt()
+{
+    const QString ipAddrHead=tcpServerIPAddress;
+    bool ok=false;
+    quint16 port=9999;
+    int tPort= tcpServerIPPort.toInt(&ok,10);
+    if(ok)
+    {
+        port=tPort;
+    }
+
+    if(udpReceiver==NULL)
+    {
+        labelStatus->setText("udpReceiver not init\n");
+        return false;
+    }
+    QString ipAddress;
+    QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
+    QHostAddress selectAddr;
+    // use the first non-localhost IPv4 address
+    labelStatus->setText(tr("正在初始化网路 \n地址: %1 端口：%2")
+                         .arg(ipAddrHead).arg(port));
+
+
+    for (int i = 0; i < ipAddressesList.size(); ++i) {
+        if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
+            ipAddressesList.at(i).toIPv4Address()) {
+
+            if(ipAddressesList.at(i).toString().indexOf(ipAddrHead)>=0)
+            {
+                selectAddr = ipAddressesList.at(i);
+                ipAddress = ipAddressesList.at(i).toString();
+                break;
+            }
+        }
+    }
+    if (!ipAddress.isEmpty())
+    {
+
+        // if we did not find one, use IPv4 localhost
+        if (ipAddress.isEmpty())
+            ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
+
+
+        if (!udpReceiver->init(selectAddr,port)) {
+            labelStatus->setText(tr("Unable to start the udp server:"));
+
+        }
+        else
+        {
+            labelStatus->setText(tr("The udp server is running on\n\nIP: %1\nport: %2\n\n")
+                             .arg(ipAddress).arg(port));
+            loadInitUdpServerFile();
+
+
+            connect(udpReceiver,
+                    &UdpReceiver::updataRobotPathServer,
+                    this,
+                    &MainWindow::onUpdataRobotPathServer);
+
+            connect(udpReceiver,
+                    &UdpReceiver::updataRobotPathServerState,
+                    this,
+                    &MainWindow::onUpdataRobotPathServerState);
+
+            connect(udpReceiver,
+                    &UdpReceiver::onNewRobotMsg,
+                    this,
+                    &MainWindow::onNewRobotMsg);
+
+            connect(udpReceiver,
+                    &UdpReceiver::newPointServer,
+                    this,
+                    &MainWindow::onNewPointServer);
+
+            return true;
+        }
+    }
+
+    return false;
+}
 //
 // Button event
 //
@@ -899,7 +961,7 @@ void MainWindow::onPushButtonLoadClicked_hand()
     QString message;
     bool result = trackClient->LoadJsonFile(fileName);
     if (result) {
-        message = "Status : " + fileName + " loaded";
+        message = "加载地图文件： " + fileName + "成功 ";
         QCurveDataCus *datLabel = trackClient->getLabelData();
         QCurveDataCus *dataDest = trackClient->getDestData();
         QCurveDataCus *dataPath = trackClient->getPathData();
@@ -931,7 +993,7 @@ void MainWindow::onPushButtonLoadClicked_hand()
         }
 
     } else {
-        message = "Status : failed to load " + fileName;
+        message = "加载地图文件失败： " + fileName;
     }
 
     labelStatus->setText(message);
@@ -939,7 +1001,7 @@ void MainWindow::onPushButtonLoadClicked_hand()
     message+="  ";
     result = trackClient->LoadJsonFileNormal(fileNameNormal);
     if (result) {
-        message += "Status : " + fileNameNormal + " loaded";
+        message += "加载地图文件B " + fileNameNormal + " 成功";
         QCurveDataCus *data = trackClient->getNormalData();
         if(data!=NULL)
         {
@@ -952,12 +1014,15 @@ void MainWindow::onPushButtonLoadClicked_hand()
             //message = "Status : failed to load normal " + fileNameNormal;
         }
     } else {
-        message += "Status : failed to load " + fileNameNormal;
+        message += "加载地图文件B " + fileNameNormal + " 失败";
     }
 
     labelStatus->setText(message);
 
+    //加载区域文件
     mainPlotLive->LoadJsonFile(fileName);
+
+    QThread::sleep(1);
 }
 
 void MainWindow::onPushButtonLoadClicked()
@@ -1209,24 +1274,17 @@ void MainWindow::onPushButtonAutoConnectClicked()
      mainPlotLive->autoConnect(disMin,disMax);
 }
 
-/*
-    QCurveDataCus *dataDest = mainPlotLive->getDestData();
-    QCurveDataCus *dataLabel = mainPlotLive->getLabelData();
-    QCurveDataCus *dataPath = mainPlotLive->getPathData();
-    if(dataDest&&dataLabel&&dataPath)
-    {
-        bool result = trackClient->saveToJsonFile(dataDest,dataLabel,dataPath,fileName);
-        if (result) {
-            message = "Status : " + fileName + " saved";
-        } else {
-            message = "Status : failed to save to" + fileName;
-        }
-    }
-    else
-    {
-      message = "Status : failed to save [no data]";
-    }
- * */
+
+
+void MainWindow::onPushButtonAutoAdjustClicked()
+{
+    bool toDoubleResultMax=false;
+    pushButtonAutoAdjust->setChecked(true);
+    double disMax = lineEditAutoConnectDisMax->text().toDouble(&toDoubleResultMax);
+    if(toDoubleResultMax==true)
+     mainPlotLive->autoAvoidNormalPoint(disMax);
+}
+
 void MainWindow::onPushButtonDownloadClicked()
 {
     QCurveDataCus *dataDest = mainPlotLive->getDestData();
@@ -1373,14 +1431,19 @@ void MainWindow::onPushButtonAddPointClicked()
 void MainWindow::onPushButtonDeletePointClicked()
 {
     pushButtonDeletePoint->setChecked(true);
+    pushButtonUpdateLabel->setChecked(false);
+    pushButtonSetPoint->setChecked(false);
     QwtPointCus point(QwtPointCus::Normal,0,0,0,0);
     bool ok;
     point = canvasPicker->getSelectedPoint(&ok);
     if(ok==false) return;
 
     if(point.rid()>100000) return;
-    trackClient->sendDeletePoint(point);
-
+    //trackClient->sendDeletePoint(point);
+    if(udpReceiver)
+    {
+        udpReceiver->sendDeletePoint(point);
+    }
     point.rid()=point.id()+100000;
     point.rx()=point.x()+500;
     canvasPicker->setSelectedPoint(point);
@@ -1389,11 +1452,16 @@ void MainWindow::onPushButtonDeletePointClicked()
 void MainWindow::onPushButtonUpdateLabelClicked()
 {
     pushButtonUpdateLabel->setChecked(true);
-
+    pushButtonDeletePoint->setChecked(false);
+    pushButtonSetPoint->setChecked(false);
     //trackClient->sendUpdateLabel();
     if(server)
     {
         server->sendUpdateLabel();
+    }
+    if(udpReceiver)
+    {
+       udpReceiver->sendUpdateLabel();
     }
 
 }
@@ -1407,6 +1475,11 @@ void MainWindow::onPushButtonAddDestClicked()
     if(ok)
     {
         trackClient->sendAddDest(id);
+        if(udpReceiver)
+        {
+           udpReceiver->sendAddDest(id);
+        }
+
     }
 
 
@@ -1562,15 +1635,16 @@ void MainWindow::loadInitUdpServerFile()
     QString message;
     bool result = trackClient->LoadJsonFile(fileName);
     if (result) {
-        message = "loadInitTcpServerFile : " + fileName + " loaded";
+
         QCurveDataCus *dataPath = trackClient->getPathData();
         if(dataPath!=NULL&&udpReceiver)
         {
             udpReceiver->loadData(dataPath,QwtPointCus::PathPoint);
+            message = "网络初始化完成 \n加载文件 : " + fileName + " 完成";
         }
         else
         {
-            message = "loadInitTcpServerFile : failed to load Path " + fileName;
+            message = "加载路线文件失败： " + fileName;
         }
         if(dlgServer&&udpReceiver)
         {
@@ -1578,7 +1652,7 @@ void MainWindow::loadInitUdpServerFile()
         }
 
     } else {
-        message = "loadInitTcpServerFile : failed to load " + fileName;
+        message = "未找到JSON文件： " + fileName;
     }
 
     labelStatus->setText(message);
@@ -1729,7 +1803,7 @@ void MainWindow::timerEvent( QTimerEvent *event )
     m_nTimerCnt++;
     //qDebug( "MainWindow timerEvent");
 
-    if(m_nTimerCnt>2)
+    if(m_nTimerCnt%3==0)
     {
         m_nTimerCnt=0;
         if(dlgServer)
@@ -1783,9 +1857,18 @@ void MainWindow::timerEvent( QTimerEvent *event )
                 serialPortInitOK=true;
             }
         }
+        else if(udpReceiver&&udpServerInitOK==false&&m_nTimerCnt%6==0)
+        {
+            udpServerInitOK = initUdpServerInt();
+        }
+
+        if(m_nTimerCnt%6==0)
+        {
+            m_nTimerCnt=0;
+        }
     }
     //return;
-    if(manager)
+    if(manager&&udpServerInitOK)
     {
         if(0&&server)
         {
@@ -1794,8 +1877,8 @@ void MainWindow::timerEvent( QTimerEvent *event )
         }
         if(udpReceiver)
         {
-            //QVector<QVector<RobotPathPoint>> pose=udpReceiver->getPose();
-            //mainPlotLive->showPose(pose);
+            QVector<QVector<RobotPathPoint>> pose=udpReceiver->getPose();
+            mainPlotLive->showPose(pose);
         }
         if(0&&myserialPort)
         {

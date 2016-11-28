@@ -344,6 +344,7 @@ private:
     QString RxData_100;
     QString RxData_102;
     QString RxData_104;
+    RobotMath m_math;
 public:
     void loadData(QCurveDataCus *data,QwtPointCus::PointStyle type);
     Robot* getRobotHandle();
@@ -351,16 +352,22 @@ public:
     inline void processData(QString &data,QHostAddress &address);
     inline void transData(QString &data,QHostAddress &address);
 
-    void onUpdateRobotPath(int robotId, int pathId,int pointNum,int pointId,double x,double y,double phi);
-    void onUpdateRobotPathByMainPath(int robotId, int pathId,int pointNum,int pointId,int mainPathId);
-    void onUpdateRobotState(QHostAddress &address,int robotId,int pathId,double x,double y,double phi,double left,double right,int goMainPathId,int robotState,int robotType);
-    void onUpdateRobotPath(QHostAddress &address,int robotId,int pathId,QVector<int> pointList);
+    void onUpdateRobotPath(QHostAddress address,int robotId, int pathId,int pointNum,int pointId,double x,double y,double phi);
+    void onUpdateRobotPathByMainPath(QHostAddress address,int robotId, int pathId,int pointNum,int pointId,int mainPathId);
+    void onUpdateRobotState(QHostAddress address,int robotId,int pathId,double x,double y,double phi,double left,double right,int goMainPathId,int robotState,int robotType);
+    void onUpdateRobotPath(QHostAddress address,int robotId,int pathId,QVector<int> pointList);
 
     unsigned short CRC16(unsigned char *puchMsg,
     unsigned short usDataLen
     );
     void sendControlCmd(int sn,int cmd,int pathId);
      QVector<QVector<RobotPathPoint>> getPose();
+
+     bool sendDeletePoint(QwtPointCus point);
+
+     bool sendUpdateLabel();
+
+     bool sendAddDest(int id);
 };
 
 #endif // UDPRECEIVER_H

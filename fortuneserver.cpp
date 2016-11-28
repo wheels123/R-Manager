@@ -234,6 +234,7 @@ void FortuneServer::onUpdateClientStatus(QTcpSocket* socket,int state)
 
  void FortuneServer::onUpdateRobotPath(QTcpSocket* socket,int robotId, int pathId,int pointNum,int pointId,double x,double y,double phi)
  {
+    QHostAddress address;
     RobotPoint rp;
     rp.x=x;
     rp.y=y;
@@ -248,7 +249,7 @@ void FortuneServer::onUpdateClientStatus(QTcpSocket* socket,int state)
         qDebug() <<"onUpdateRobotPath  sn not match socket "<<QString::number(robotId,10);
         return;
     }
-    int ret = robot.insertPathPoint(robotId,pathId,rp,pointNum,pointId);
+    int ret = robot.insertPathPoint(address,robotId,pathId,rp,pointNum,pointId);
      qDebug() <<"insertPathPoint ret "<<QString::number(ret,10);
 
     robot.updateControlNum();
@@ -257,6 +258,7 @@ void FortuneServer::onUpdateClientStatus(QTcpSocket* socket,int state)
 
  void FortuneServer::onUpdateRobotPathByMainPath(QTcpSocket* socket,int robotId, int pathId,int pointNum,int pointId,int mainPathId)
  {
+    QHostAddress address;
     if(findSerialNumber(robotId)<0)
     {
      qDebug() <<"onUpdateRobotPath  sn not exit "<<QString::number(robotId,10);
@@ -267,7 +269,7 @@ void FortuneServer::onUpdateClientStatus(QTcpSocket* socket,int state)
      qDebug() <<"onUpdateRobotPath  sn not match socket "<<QString::number(robotId,10);
      return;
     }
-    int ret = robot.insertPathPoint(robotId,pathId,mainPathId,pointNum,pointId);
+    int ret = robot.insertPathPoint(address,robotId,pathId,mainPathId,pointNum,pointId);
      qDebug() <<"insertPathPoint2 ret "<<QString::number(ret,10);
     emit updataRobotPathServer(&robot);
  }
@@ -413,8 +415,8 @@ void FortuneServer::onUpdateRobotState(QTcpSocket* socket,int robotId,double x,d
     rp.x=x;
     rp.y=y;
     rp.phi=phi;
-
-    int ret = robot.insertRobotState(robotId,0,rp,left,right,goMainPathId,robotState,robotType,1);
+    QHostAddress address;
+    int ret = robot.insertRobotState(address,robotId,0,rp,left,right,goMainPathId,robotState,robotType,1);
      //qDebug() <<"insertRobotState ret "<<QString::number(ret,10);
 
     //robot.updateControlNum();

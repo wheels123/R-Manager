@@ -48,7 +48,9 @@ private:
     inline void initStatusBar();
     inline void initTrackClient();
     inline void initTrackServer();
-    inline void iniUdpServer();
+    inline void initUdpServer();
+    inline void initUpdServerS();
+    inline bool initUdpServerInt();
     inline void initManager();
     inline QWidget *initToolBarDrawing(QToolBar *toolBar);
     inline QWidget *initToolBarPoint(QToolBar *toolBar);
@@ -77,6 +79,7 @@ private:
     QPushButton  *pushButtonDeleteLine;
     QPushButton  *pushButtonConvert;
     QPushButton  *pushButtonAutoConnect;
+    QPushButton  *pushButtonAutoAdjust;
     QPushButton  *pushButtonDownLoad;
     QPushButton  *pushButtonOutputOption;
     QPushButton  *pushButtonServer;
@@ -113,6 +116,7 @@ private:
     QString serialPortNum;
     MySerialPort *myserialPort;
     bool serialPortInitOK;
+    bool udpServerInitOK;
     bool useUART;
     QString mapFileName;
 
@@ -133,6 +137,7 @@ private:
     inline void onPushButtonDeleteLineClicked();
     inline void onPushButtonConvertClicked();
     inline void onPushButtonAutoConnectClicked();
+    inline void onPushButtonAutoAdjustClicked();
     inline void onPushButtonDownloadClicked();
     inline void onPushButtonSetPointClicked();
     inline void onPushButtonAddPointClicked();

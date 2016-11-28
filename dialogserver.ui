@@ -30,6 +30,9 @@
    </property>
   </widget>
   <widget class="QListView" name="listViewClient">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -42,14 +45,17 @@
   <widget class="QTreeView" name="treeViewPath">
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>30</x>
      <y>20</y>
-     <width>901</width>
+     <width>1061</width>
      <height>761</height>
     </rect>
    </property>
    <property name="horizontalScrollBarPolicy">
     <enum>Qt::ScrollBarAlwaysOn</enum>
+   </property>
+   <property name="editTriggers">
+    <set>QAbstractItemView::NoEditTriggers</set>
    </property>
   </widget>
   <widget class="QTreeView" name="treeViewMainPath">

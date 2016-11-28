@@ -98,7 +98,7 @@ Robot* UdpReceiver::getRobotHandle()
 
 
 
- void UdpReceiver::onUpdateRobotPath(int robotId, int pathId,int pointNum,int pointId,double x,double y,double phi)
+ void UdpReceiver::onUpdateRobotPath(QHostAddress address,int robotId, int pathId,int pointNum,int pointId,double x,double y,double phi)
  {
     RobotPoint rp;
     rp.x=x;
@@ -109,47 +109,37 @@ Robot* UdpReceiver::getRobotHandle()
         qDebug() <<"onUpdateRobotPath  sn not exit "<<QString::number(robotId,10);
         return;
     }
-    /*
-    if(clientList.findSNFromSocket(address)!=robotId)
-    {
-        qDebug() <<"onUpdateRobotPath  sn not match socket "<<QString::number(robotId,10);
-        return;
-    }*/
-    int ret = robot.insertPathPoint(robotId,pathId,rp,pointNum,pointId);
+
+    int ret = robot.insertPathPoint(address,robotId,pathId,rp,pointNum,pointId);
      qDebug() <<"insertPathPoint ret "<<QString::number(ret,10);
 
     robot.updateControlNum();
     emit updataRobotPathServer(&robot);
  }
 
- void UdpReceiver::onUpdateRobotPathByMainPath(int robotId, int pathId,int pointNum,int pointId,int mainPathId)
+ void UdpReceiver::onUpdateRobotPathByMainPath(QHostAddress address,int robotId, int pathId,int pointNum,int pointId,int mainPathId)
  {
     if(findSerialNumber(robotId)<0)
     {
      qDebug() <<"onUpdateRobotPath  sn not exit "<<QString::number(robotId,10);
      return;
     }
-    /*
-    if(clientList.findSNFromSocket(address)!=robotId)
-    {
-     qDebug() <<"onUpdateRobotPath  sn not match socket "<<QString::number(robotId,10);
-     return;
-    }*/
-    int ret = robot.insertPathPoint(robotId,pathId,mainPathId,pointNum,pointId);
+
+    int ret = robot.insertPathPoint(address,robotId,pathId,mainPathId,pointNum,pointId);
      qDebug() <<"insertPathPoint2 ret "<<QString::number(ret,10);
     emit updataRobotPathServer(&robot);
  }
 
  int UdpReceiver::findSerialNumber(int sn)
  {
-     int size = clientList.getSNSize();
-     for(int i=0;i<size;i++)
+     int index=0;
+     bool ret = robot.findRobotId(sn,index);
+
+     if(ret)
      {
-         if(clientList.getSNByIndex(i)==sn)
-         {
-             return i;
-         }
+        return index;
      }
+
      return -1;
  }
 
@@ -176,6 +166,11 @@ Robot* UdpReceiver::getRobotHandle()
      else if(address.toString()=="192.168.1.104")
      {
          curData=&RxData_104;
+         curData->append(list.at(0));
+     }
+     else
+     {
+         curData=&RxData_100;
          curData->append(list.at(0));
      }
 
@@ -274,7 +269,7 @@ Robot* UdpReceiver::getRobotHandle()
          double y = splitData.at(++atId).toDouble(&ret);if(ret==false){qDebug() << "trans path error data["<<data<<"] at["<<QString::number(atId, 10)<<"]";return;}
          double p = splitData.at(++atId).toDouble(&ret);if(ret==false){qDebug() << "trans path error data["<<data<<"] at["<<QString::number(atId, 10)<<"]";return;}
          qDebug()<<"get path";
-         onUpdateRobotPath( robotId,pathId, pointNum, pointId, x, y,p);
+         onUpdateRobotPath( address,robotId,pathId, pointNum, pointId, x, y,p);
      }
      else if(type=="P"&&itemNo==6)
      {
@@ -289,7 +284,7 @@ Robot* UdpReceiver::getRobotHandle()
          //double y = splitData.at(++atId).toDouble(&ret);if(ret==false){qDebug() << "trans path error data["<<data<<"] at["<<QString::number(atId, 10)<<"]";return;}
          //double p = splitData.at(++atId).toDouble(&ret);if(ret==false){qDebug() << "trans path error data["<<data<<"] at["<<QString::number(atId, 10)<<"]";return;}
          qDebug()<<"get path2";
-         onUpdateRobotPathByMainPath( robotId,pathId, pointNum, pointId,mainPathId);
+         onUpdateRobotPathByMainPath(address, robotId,pathId, pointNum, pointId,mainPathId);
      }
      else if(type=="Q")
      {
@@ -333,7 +328,7 @@ Robot* UdpReceiver::getRobotHandle()
              //qDebug()<<"get path Q len "<<n;
              unsigned short crc16=CRC16((unsigned char *)ch,n);
 
-             if(crc == crc16)
+             if(true||crc == crc16)
              {
                  //qDebug()<<"get path Q date size "<<QString::number(dataSize,10)<<" crc16 "<<QString::number(crc16,16);
                  onUpdateRobotPath( address,robotId,pathId,path);
@@ -421,7 +416,7 @@ Robot* UdpReceiver::getRobotHandle()
          //qDebug()<<"get robot state len "<<n;
          unsigned short crc16=CRC16((unsigned char *)ch,n);
 
-         if(crc == crc16)
+         if(true||crc == crc16)
          {
              //qDebug()<<"get robot state data size "<<QString::number(dataSize,10)<<" crc16 "<<QString::number(crc16,16);
              onUpdateRobotState(address,robotId,pathId,x, y,p,left,right,goMainPathId,robotState,robotType);
@@ -460,54 +455,23 @@ Robot* UdpReceiver::getRobotHandle()
 
          qDebug()<<"get bm point";
          //onNewPoint(pointData);
-
+         emit newPointServer(pointData);
      }
  }
 
 
- void UdpReceiver::onUpdateRobotState(QHostAddress &address, int robotId,int pathId,double x,double y,double phi,double left,double right,int goMainPathId,int robotState,int robotType)
+ void UdpReceiver::onUpdateRobotState(QHostAddress address, int robotId,int pathId,double x,double y,double phi,double left,double right,int goMainPathId,int robotState,int robotType)
  {
      RobotPoint rp;
      rp.x=x;
      rp.y=y;
      rp.phi=phi;
-    int ret = clientList.inseartClient(address,robotId);
-
-    if(ret==1)
-    {
-        QByteArray Buffer;
-        Buffer.append("\r\nstate get client from ip ");
-        Buffer.append(address.toString());
-        Buffer.append(" sn ");
-        Buffer.append(QString::number(robotId,10));
-        qDebug( Buffer.data());
-    }
-    robot.insertRobotState(robotId,10,rp,left,right,goMainPathId,robotState,robotType,m_time.elapsed());
-
-     //emit updataRobotPathServerState(&robot);
-
-     //emit onNewRobotMsg(robot.getMsg());
+    robot.insertRobotState(address,robotId,10,rp,left,right,goMainPathId,robotState,robotType,m_time.elapsed());
  }
 
- void UdpReceiver::onUpdateRobotPath(QHostAddress &address,int robotId,int pathId,QVector<int> pointList)
+ void UdpReceiver::onUpdateRobotPath(QHostAddress address,int robotId,int pathId,QVector<int> pointList)
  {
-     int ret = clientList.inseartClient(address,robotId);
-
-     if(ret==1)
-     {
-         QByteArray Buffer;
-         Buffer.append("\r\npath get client from ip ");
-         Buffer.append(address.toString());
-         Buffer.append(" sn ");
-         Buffer.append(QString::number(robotId,10));
-         qDebug( Buffer.data());
-     }
-
-     robot.insertPathPointList(robotId,pathId,pointList,m_time.elapsed());
-
-     //emit updataRobotPathServerState(&robot);
-
-     //emit onNewRobotMsg(robot.getMsg());
+     robot.insertPathPointList(address,robotId,pathId,pointList,m_time.elapsed());
  }
 
 
@@ -592,7 +556,6 @@ Robot* UdpReceiver::getRobotHandle()
             {
                sendControlCmd(sn,robot.getRobotControl(cnt),rp.id);
             }
-            //sendControlCmd(sn,robot.getRobotControl(cnt),rp.id);
          }
          addTimeNext=0;
          m_timeSendCtrl->setInterval(irpTime);
@@ -614,10 +577,11 @@ Robot* UdpReceiver::getRobotHandle()
 
  void UdpReceiver::sendControlCmd(int sn,int cmd,int pathId)
  {
-     QByteArray Buffer;
+    QByteArray Buffer;
 
-   QHostAddress address;
-     bool ret = clientList.findSocketBySN(sn,address);
+    QHostAddress address;
+    // bool ret = clientList.findSocketBySN(sn,address);
+    bool ret = robot.findIpByRobotId(sn,address);
     if(!ret)
     {
         qDebug()<<"sendControlCmd err cannot find sn address"<<QString::number(sn,10);
@@ -648,3 +612,44 @@ Robot* UdpReceiver::getRobotHandle()
      robot.estimateRobotPose();
      return robot.getPose();
  }
+
+
+ bool UdpReceiver::sendDeletePoint(QwtPointCus point)
+ {
+     QByteArray dataWrite;
+     QString str;
+
+     str.sprintf("$DEL%5d\n",point.id());
+     dataWrite=str.toLatin1();
+     //write(dataWrite,dataWrite.size());
+     udpSocket->writeDatagram(dataWrite, dataWrite.size(),
+                              QHostAddress::Broadcast, 1);
+     return true;
+ }
+
+ bool UdpReceiver::sendUpdateLabel()
+ {
+     QByteArray dataWrite;
+     QString str;
+
+     str.sprintf("$UDL%5d\n",0);
+     dataWrite=str.toLatin1();
+     //write(dataWrite,dataWrite.size());
+     udpSocket->writeDatagram(dataWrite, dataWrite.size(),
+                              QHostAddress::Broadcast, 1);
+     return true;
+ }
+
+ bool UdpReceiver::sendAddDest(int id)
+ {
+     QByteArray dataWrite;
+     QString str;
+
+     str.sprintf("$ADD%5d\n",id);
+     dataWrite=str.toLatin1();
+     //write(dataWrite,dataWrite.size());
+     udpSocket->writeDatagram(dataWrite, dataWrite.size(),
+                              QHostAddress::Broadcast, 1);
+     return true;
+ }
+

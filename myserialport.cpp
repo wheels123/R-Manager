@@ -374,8 +374,8 @@ inline void MySerialPort::transData(QString &data)
     rp.x=x;
     rp.y=y;
     rp.phi=phi;
-
-    int ret = robot.insertPathPoint(robotId,pathId,rp,pointNum,pointId);
+    QHostAddress address;
+    int ret = robot.insertPathPoint(address,robotId,pathId,rp,pointNum,pointId);
      qDebug() <<"insertPathPoint by piont ret "<<QString::number(ret,10);
 
     robot.updateControlNum();
@@ -384,7 +384,8 @@ inline void MySerialPort::transData(QString &data)
 
  void MySerialPort::onUpdateRobotPathByMainPath(int robotId, int pathId,int pointNum,int pointId,int mainPathId)
  {
-    int ret = robot.insertPathPoint(robotId,pathId,mainPathId,pointNum,pointId);
+    QHostAddress address;
+    int ret = robot.insertPathPoint(address,robotId,pathId,mainPathId,pointNum,pointId);
      qDebug() <<"insertPathPoint by id ret "<<QString::number(ret,10);
     emit updataRobotPathServer(&robot);
  }
@@ -406,8 +407,8 @@ inline void MySerialPort::transData(QString &data)
      rp.x=x;
      rp.y=y;
      rp.phi=phi;
-
-     int ret = robot.insertRobotState(robotId,10,rp,left,right,goMainPathId,robotState,robotType,m_time.elapsed());
+     QHostAddress address;
+     int ret = robot.insertRobotState(address,robotId,10,rp,left,right,goMainPathId,robotState,robotType,m_time.elapsed());
 
      emit updataRobotPathServerState(&robot);
 
@@ -416,7 +417,8 @@ inline void MySerialPort::transData(QString &data)
 
  void MySerialPort::onUpdateRobotPath(int robotId,int pathId,QVector<int> pointList)
  {
-     int ret = robot.insertPathPointList(robotId,pathId,pointList,m_time.elapsed());
+    QHostAddress address;
+     int ret = robot.insertPathPointList(address,robotId,pathId,pointList,m_time.elapsed());
 
      emit updataRobotPathServerState(&robot);
 
@@ -538,7 +540,8 @@ inline void MySerialPort::transData(QString &data)
       rp.x=0;
       rp.y=0;
       rp.phi=0;
-      int ret = robot.insertRobotState(sn,10,rp,0,0,0,0,0,m_time.elapsed());
+      QHostAddress address;
+      int ret = robot.insertRobotState(address,sn,10,rp,0,0,0,0,0,m_time.elapsed());
       emit updataRobotPathServerState(&robot);
       emit onNewRobotMsg(robot.getMsg());
       sendSNOK(sn);
